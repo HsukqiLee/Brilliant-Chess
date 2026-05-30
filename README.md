@@ -4,6 +4,23 @@
 
 [**Brilliant Chess**](https://wdeloo.github.io/Brilliant-Chess) is a **free** **open source** app to analyze chess games in a similar way **Chess.com** does.
 
+## Analysis Metrics
+
+- The Summary panel now includes **Average CPL (centipawn loss)** for both players.
+- CPL is computed from Stockfish evaluations per move and ignores mate evaluations.
+- A CLI validator is available:
+
+```
+node scripts/validate-cpl.mjs scripts/sample.pgn
+```
+
+Optional depth override (default is 10 in the script):
+
+```
+$env:STOCKFISH_DEPTH=18
+node scripts/validate-cpl.mjs scripts/sample.pgn
+```
+
 
 
 ## Self Hosting
