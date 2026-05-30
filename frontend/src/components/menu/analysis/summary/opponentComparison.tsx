@@ -157,12 +157,12 @@ export default function OpponentComparison(props: { moves: move[], players: play
             {/* Compared ELO Selection tabs */}
             <div className="flex flex-col gap-1.5">
                 <span className="text-xs font-bold text-foregroundGrey">对比目标分段:</span>
-                <div className="grid grid-cols-3 gap-1 md:flex md:flex-row md:justify-between bg-neutral-950 p-1 rounded-borderRoundness border border-neutral-900">
+                <div className="grid grid-cols-3 gap-1 md:flex md:flex-row md:justify-between bg-neutral-950 p-1 rounded-borderRoundness border border-neutral-900 overflow-hidden">
                     {RATING_LEVELS.map(level => (
                         <button
                             key={level.elo}
                             onClick={() => setComparedElo(level.elo)}
-                            className={`flex-1 py-1 rounded text-xs font-extrabold transition-all text-center ${comparedElo === level.elo ? 'bg-backgroundBoxBox text-foreground border border-neutral-700/50' : 'text-foregroundGrey hover:text-foreground'}`}
+                            className={`flex-1 py-1 rounded text-xs font-extrabold transition-all duration-200 text-center ${comparedElo === level.elo ? 'bg-backgroundBoxBoxHighlighted text-foreground shadow-md scale-105 border-transparent' : 'text-foregroundGrey hover:text-foreground hover:bg-neutral-900/60'}`}
                         >
                             {level.elo}
                         </button>
@@ -173,7 +173,7 @@ export default function OpponentComparison(props: { moves: move[], players: play
             {/* Comparison Metrics Grid */}
             <div className="flex flex-col gap-3">
                 {/* Accuracy */}
-                <div className="flex flex-col gap-1 p-2 bg-neutral-950/40 rounded border border-neutral-900">
+                <div className="flex flex-col gap-1 p-2 bg-neutral-950/40 hover:bg-neutral-950/70 rounded border border-neutral-900 hover:border-neutral-800/80 transition-all duration-200">
                     <div className="flex flex-row justify-between items-center">
                         <span className="text-sm font-bold text-foreground">准确率 (Accuracy)</span>
                         {renderDiffBadge(diffAccuracy, true)}
@@ -185,7 +185,7 @@ export default function OpponentComparison(props: { moves: move[], players: play
                 </div>
 
                 {/* Avg CPL */}
-                <div className="flex flex-col gap-1 p-2 bg-neutral-950/40 rounded border border-neutral-900">
+                <div className="flex flex-col gap-1 p-2 bg-neutral-950/40 hover:bg-neutral-950/70 rounded border border-neutral-900 hover:border-neutral-800/80 transition-all duration-200">
                     <div className="flex flex-row justify-between items-center">
                         <span className="text-sm font-bold text-foreground">平均分值损耗 (Avg CPL)</span>
                         {renderDiffBadge(diffCpl)}
@@ -197,7 +197,7 @@ export default function OpponentComparison(props: { moves: move[], players: play
                 </div>
 
                 {/* Blunders */}
-                <div className="flex flex-col gap-1 p-2 bg-neutral-950/40 rounded border border-neutral-900">
+                <div className="flex flex-col gap-1 p-2 bg-neutral-950/40 hover:bg-neutral-950/70 rounded border border-neutral-900 hover:border-neutral-800/80 transition-all duration-200">
                     <div className="flex flex-row justify-between items-center">
                         <span className="text-sm font-bold text-foreground">大失误数 (Blunders)</span>
                         {renderDiffBadge(diffBlunders)}
@@ -209,7 +209,7 @@ export default function OpponentComparison(props: { moves: move[], players: play
                 </div>
 
                 {/* Mistakes */}
-                <div className="flex flex-col gap-1 p-2 bg-neutral-950/40 rounded border border-neutral-900">
+                <div className="flex flex-col gap-1 p-2 bg-neutral-950/40 hover:bg-neutral-950/70 rounded border border-neutral-900 hover:border-neutral-800/80 transition-all duration-200">
                     <div className="flex flex-row justify-between items-center">
                         <span className="text-sm font-bold text-foreground">错误数 (Mistakes)</span>
                         {renderDiffBadge(diffMistakes)}
@@ -222,7 +222,7 @@ export default function OpponentComparison(props: { moves: move[], players: play
             </div>
 
             {/* Coach Insight */}
-            <div className="p-3 bg-neutral-900 rounded-borderRoundness border border-neutral-800 text-xs text-foregroundGrey leading-relaxed font-semibold">
+            <div className="p-3 bg-neutral-900/80 rounded-r-borderRoundness border border-neutral-800 border-l-4 border-l-backgroundBoxBoxHighlighted text-xs text-foregroundGrey leading-relaxed font-semibold shadow-inner">
                 {getCoachAdvice()}
             </div>
         </div>
