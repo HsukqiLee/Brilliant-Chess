@@ -1,0 +1,42 @@
+version: '3.8'
+
+services:
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    ports:
+      - "3000:3000"
+    environment:
+      - NEXT_PUBLIC_BACKEND_URL=http://localhost:9080
+    volumes:
+      - ./frontend:/app
+      - /app/node_modules
+    depends_on:
+      - backend
+
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    ports:
+      - "9080:8080"
+    environment:
+      - PORT=8080
+      - STOCKFISH_HOST=stockfish
+      - DEFAULT_MODEL=sf18
+      - STOCKFISH_PORT_SF18=3333
+      - STOCKFISH_PORT_SF17=3334
+      - STOCKFISH_PORT_SF16=3335
+      - GEMINI_API_KEY=${GEMINI_API_KEY}
+    depends_on:
+      - stockfish
+
+  stockfish:
+    build:
+      context: ./stockfish
+      dockerfile: Dockerfile
+    ports:
+      - "3333:3333"
+      - "3334:3334"
+      - "3335:3335"
