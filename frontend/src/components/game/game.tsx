@@ -473,8 +473,6 @@ export default function Game() {
           NOT_SUPPORTED_WASM_WARNING[0],
           NOT_SUPPORTED_WASM_WARNING[1],
         );
-      } else {
-        // pushPageWarning(setErrors, NOT_SUPPORTED_WASM_THREADS_WARNING[0], NOT_SUPPORTED_WASM_THREADS_WARNING[1])
       }
     }
 

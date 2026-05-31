@@ -21,8 +21,6 @@ $env:STOCKFISH_DEPTH=18
 node scripts/validate-cpl.mjs scripts/sample.pgn
 ```
 
-
-
 ## Self Hosting
 
 1. Clone the repository:
@@ -50,3 +48,5 @@ npm run build
 ```
 npm run start
 ```
+
+If you deploy with Docker, `frontend/Dockerfile` builds the backend-only production image and `frontend/Dockerfile.full` keeps the local/offline wasm engine assets.

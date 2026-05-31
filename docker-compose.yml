@@ -1,19 +1,26 @@
-version: '3.8'
+version: "3.8"
 
 services:
   frontend:
     build:
       context: ./frontend
       dockerfile: Dockerfile
+      args:
+        NEXT_PUBLIC_BACKEND_URL: http://backend:8080
     ports:
-      - "3000:3000"
-    environment:
-      - NEXT_PUBLIC_BACKEND_URL=http://localhost:9080
-    volumes:
-      - ./frontend:/app
-      - /app/node_modules
+      - "3000:80"
     depends_on:
       - backend
+
+  # 如果需要离线 / 本地引擎模式，可改用完整前端镜像：
+  # frontend:
+  #   build:
+  #     context: ./frontend
+  #     dockerfile: Dockerfile.full
+  #   ports:
+  #     - "3000:80"
+  #   depends_on:
+  #     - backend
 
   backend:
     build:

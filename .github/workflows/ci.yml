@@ -67,3 +67,9 @@ jobs:
 
       - name: Verify Docker Compose Build
         run: docker compose build
+
+      - name: Verify Frontend Production Image Build
+        run: docker build -f frontend/Dockerfile -t chess-frontend-ci ./frontend
+
+      - name: Verify Frontend Full Image Build
+        run: docker build -f frontend/Dockerfile.full -t chess-frontend-full-ci ./frontend

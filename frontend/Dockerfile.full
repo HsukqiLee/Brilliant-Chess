@@ -1,14 +1,11 @@
 FROM node:22-alpine AS builder
 WORKDIR /app
 
-ARG NEXT_PUBLIC_BACKEND_URL=http://backend:8080
-ENV NEXT_PUBLIC_BACKEND_URL=${NEXT_PUBLIC_BACKEND_URL}
-
 COPY package*.json ./
 RUN npm ci
 
 COPY . .
-RUN npm run build && rm -rf dist/engine
+RUN npm run build && rm -f dist/engine/stockfish-asm.js
 
 FROM nginx:1.27-alpine AS runner
 WORKDIR /usr/share/nginx/html

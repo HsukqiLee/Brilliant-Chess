@@ -46,21 +46,25 @@ jobs:
           fi
 
           frontend_tags=""
+          frontend_full_tags=""
           backend_tags=""
           stockfish_tags=""
 
           for suffix in "${suffixes[@]}"; do
             if [ -n "$frontend_tags" ]; then
               frontend_tags="${frontend_tags},"
+              frontend_full_tags="${frontend_full_tags},"
               backend_tags="${backend_tags},"
               stockfish_tags="${stockfish_tags},"
             fi
             frontend_tags="${frontend_tags}${base_image}/frontend:${suffix}"
+            frontend_full_tags="${frontend_full_tags}${base_image}/frontend-full:${suffix}"
             backend_tags="${backend_tags}${base_image}/backend:${suffix}"
             stockfish_tags="${stockfish_tags}${base_image}/stockfish:${suffix}"
           done
 
           echo "frontend_tags=${frontend_tags}" >> $GITHUB_OUTPUT
+          echo "frontend_full_tags=${frontend_full_tags}" >> $GITHUB_OUTPUT
           echo "backend_tags=${backend_tags}" >> $GITHUB_OUTPUT
           echo "stockfish_tags=${stockfish_tags}" >> $GITHUB_OUTPUT
 
@@ -94,6 +98,16 @@ jobs:
           file: ./frontend/Dockerfile
           push: true
           tags: ${{ steps.meta.outputs.frontend_tags }}
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+
+      - name: Build and Push Frontend Full Image
+        uses: docker/build-push-action@v7
+        with:
+          context: ./frontend
+          file: ./frontend/Dockerfile.full
+          push: true
+          tags: ${{ steps.meta.outputs.frontend_full_tags }}
           cache-from: type=gha
           cache-to: type=gha,mode=max
 
