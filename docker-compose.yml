@@ -31,10 +31,12 @@ services:
       - GEMINI_API_KEY=${GEMINI_API_KEY}
       - DB_TYPE=${DB_TYPE:-sqlite}
       - DB_DSN=${DB_DSN:-data/chess.db}
+      - REDIS_ADDR=redis:6379
     volumes:
       - ./backend/data:/app/data
     depends_on:
       - stockfish
+      - redis
 
   stockfish:
     build:
@@ -44,3 +46,13 @@ services:
       - "3333:3333"
       - "3334:3334"
       - "3335:3335"
+
+  redis:
+    image: redis:7-alpine
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+
+volumes:
+  redis_data:

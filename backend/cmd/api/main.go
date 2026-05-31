@@ -20,14 +20,15 @@ func main() {
 	defer dbSvc.Close()
 
 	aiSvc := service.NewAIService(cfg.AIFormat, cfg.AIAPIKey, cfg.AIEndpoint, cfg.AIModel)
+	cacheSvc := service.NewCacheService(cfg.RedisAddr, cfg.RedisPassword)
 
 	evalHandler := handler.NewEvaluateHandler(cfg)
-	commentaryHandler := handler.NewCommentaryHandler(aiSvc)
+	commentaryHandler := handler.NewCommentaryHandler(aiSvc, cacheSvc)
 	modelsHandler := handler.NewModelsHandler(cfg)
-	tacticsHandler := handler.NewTacticsHandler(aiSvc)
+	tacticsHandler := handler.NewTacticsHandler(aiSvc, cacheSvc)
 	libraryHandler := handler.NewLibraryHandler(dbSvc)
 	authHandler := handler.NewAuthHandler(dbSvc, cfg.JWTSecret)
-	playHandler := handler.NewPlayHandler(aiSvc)
+	playHandler := handler.NewPlayHandler(aiSvc, cacheSvc)
 
 	authMiddleware := middleware.NewAuthMiddleware(cfg.JWTSecret)
 

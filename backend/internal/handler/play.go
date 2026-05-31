@@ -1,19 +1,23 @@
 package handler
 
 import (
+	"crypto/sha256"
 	"encoding/json"
+	"fmt"
 	"net/http"
 	"strings"
+	"time"
 
 	"chess-backend/internal/service"
 )
 
 type PlayHandler struct {
-	aiSvc *service.AIService
+	aiSvc    *service.AIService
+	cacheSvc *service.CacheService
 }
 
-func NewPlayHandler(aiSvc *service.AIService) *PlayHandler {
-	return &PlayHandler{aiSvc: aiSvc}
+func NewPlayHandler(aiSvc *service.AIService, cacheSvc *service.CacheService) *PlayHandler {
+	return &PlayHandler{aiSvc: aiSvc, cacheSvc: cacheSvc}
 }
 
 type PlayRequest struct {
@@ -42,6 +46,23 @@ func (h *PlayHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	personality := req.Personality
 	if personality == "" {
 		personality = "The Chatty Coach"
+	}
+
+	var redisKey string
+	if h.cacheSvc.IsEnabled() {
+		hasher := sha256.New()
+		hasher.Write([]byte(req.Fen))
+		fenHash := fmt.Sprintf("%x", hasher.Sum(nil))
+		redisKey = fmt.Sprintf("play:%s:%s", fenHash, personality)
+
+		if val, err := h.cacheSvc.Get(redisKey); err == nil {
+			var cachedRes PlayResponse
+			if json.Unmarshal([]byte(val), &cachedRes) == nil {
+				w.Header().Set("Content-Type", "application/json")
+				json.NewEncoder(w).Encode(cachedRes)
+				return
+			}
+		}
 	}
 
 	responseRaw, err := h.aiSvc.PlayMove(req.Fen, req.LegalMoves, personality)
@@ -86,6 +107,12 @@ func (h *PlayHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		// Fallback if the AI chose an illegal move
 		playResp.Move = req.LegalMoves[0]
 		playResp.Comment = "Making a solid, classic move."
+	}
+
+	if h.cacheSvc.IsEnabled() && redisKey != "" {
+		if serialized, err := json.Marshal(playResp); err == nil {
+			_ = h.cacheSvc.Set(redisKey, string(serialized), 24*time.Hour)
+		}
 	}
 
 	w.Header().Set("Content-Type", "application/json")

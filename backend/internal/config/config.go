@@ -21,6 +21,8 @@ type Config struct {
 	DBType        string
 	DBDSN         string
 	JWTSecret     string
+	RedisAddr     string
+	RedisPassword string
 }
 
 func Load() *Config {
@@ -91,6 +93,9 @@ func Load() *Config {
 		jwtSecret = "brilliant-chess-secret-key-123"
 	}
 
+	redisAddr := os.Getenv("REDIS_ADDR")
+	redisPassword := os.Getenv("REDIS_PASSWORD")
+
 	return &Config{
 		Port:          port,
 		StockfishHost: stockfishHost,
@@ -104,5 +109,7 @@ func Load() *Config {
 		DBType:        dbType,
 		DBDSN:         dbDSN,
 		JWTSecret:     jwtSecret,
+		RedisAddr:     redisAddr,
+		RedisPassword: redisPassword,
 	}
 }

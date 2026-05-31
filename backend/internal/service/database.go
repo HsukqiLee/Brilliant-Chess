@@ -198,5 +198,15 @@ func (s *DBService) initSchema() error {
 	// Execute it and ignore any error (e.g. "duplicate column name")
 	_ = s.DB.QueryRow(alterStmt)
 
+	// Create index on games (user_id, created_at DESC) for fast queries and sorting
+	var indexStmt string
+	if s.DBType == "mysql" {
+		indexStmt = "CREATE INDEX idx_games_user_created ON games (user_id, created_at DESC)"
+	} else {
+		indexStmt = "CREATE INDEX IF NOT EXISTS idx_games_user_created ON games (user_id, created_at DESC)"
+	}
+	// Ignore errors if the index already exists (e.g. index already exists on SQLite/Postgres)
+	_ = s.DB.QueryRow(indexStmt)
+
 	return nil
 }
