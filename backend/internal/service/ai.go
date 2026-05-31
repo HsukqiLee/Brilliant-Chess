@@ -282,3 +282,18 @@ func (s *AIService) AnalyzeTactics(req TacticsRequest) (*TacticsResponse, error)
 	}
 	return &tacticsResp, nil
 }
+
+func (s *AIService) PlayMove(fen string, legalMoves []string, personality string) (string, error) {
+	prompt := fmt.Sprintf(`You are playing a game of chess as an AI opponent with the personality: "%s".
+The current board state in FEN is: %s.
+The list of legal moves available to you is: %v.
+You must choose exactly one move from this list of legal moves.
+Your response MUST be a JSON object containing:
+1. "move": The move you choose (must be exactly one of the strings in the legal moves list).
+2. "comment": A 1-sentence comment explaining your move, written in your personality style.
+
+Return ONLY the raw JSON object, without markdown formatting.
+Example: {"move": "e2e4", "comment": "I control the center and unleash my bishops!"}`, personality, fen, legalMoves)
+
+	return s.callAI(prompt)
+}
