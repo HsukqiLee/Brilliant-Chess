@@ -1,12 +1,10 @@
-name: CI/CD Build Check
+name: CI Build Check
 
 on:
   push:
-    tags:
-      - 'v*' # Trigger on version tags (e.g. v1.0.0, v2.0.0-rc1)
-  release:
-    types: [published, prereleased] # Trigger on release or prerelease publication
-  workflow_dispatch: # Allows manual trigger from Actions tab
+    branches:
+      - main
+  pull_request:
 
 jobs:
   backend-check:

@@ -17,3 +17,9 @@ updates:
     directory: "/"
     schedule:
       interval: "weekly"
+
+  # Maintain GitHub Actions dependencies
+  - package-ecosystem: "github-actions"
+    directory: "/"
+    schedule:
+      interval: "weekly"
