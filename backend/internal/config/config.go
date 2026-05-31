@@ -14,6 +14,10 @@ type Config struct {
 	GeminiAPIKey  string
 	DefaultModel  string
 	Models        []ModelConfig
+	AIFormat      string
+	AIAPIKey      string
+	AIEndpoint    string
+	AIModel       string
 }
 
 func Load() *Config {
@@ -51,12 +55,36 @@ func Load() *Config {
 		{ID: "sf16", Name: "Stockfish 16 (Small)", Port: sf16Port},
 	}
 
+	aiFormat := os.Getenv("AI_FORMAT")
+	if aiFormat == "" {
+		aiFormat = "gemini"
+	}
+	aiAPIKey := os.Getenv("AI_API_KEY")
+	if aiAPIKey == "" {
+		aiAPIKey = geminiAPIKey
+	}
+	aiEndpoint := os.Getenv("AI_ENDPOINT")
+	aiModel := os.Getenv("AI_MODEL")
+	if aiModel == "" {
+		if aiFormat == "gemini" {
+			aiModel = "gemini-2.5-flash"
+		} else if aiFormat == "openai" {
+			aiModel = "gpt-4o-mini"
+		} else if aiFormat == "anthropic" {
+			aiModel = "claude-3-5-sonnet-20241022"
+		}
+	}
+
 	return &Config{
 		Port:          port,
 		StockfishHost: stockfishHost,
 		GeminiAPIKey:  geminiAPIKey,
 		DefaultModel:  defaultModel,
 		Models:        models,
+		AIFormat:      aiFormat,
+		AIAPIKey:      aiAPIKey,
+		AIEndpoint:    aiEndpoint,
+		AIModel:       aiModel,
 	}
 }
 

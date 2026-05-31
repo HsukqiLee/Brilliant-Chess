@@ -8,11 +8,11 @@ import (
 )
 
 type CommentaryHandler struct {
-	geminiSvc *service.GeminiService
+	aiSvc *service.AIService
 }
 
-func NewCommentaryHandler(geminiSvc *service.GeminiService) *CommentaryHandler {
-	return &CommentaryHandler{geminiSvc: geminiSvc}
+func NewCommentaryHandler(aiSvc *service.AIService) *CommentaryHandler {
+	return &CommentaryHandler{aiSvc: aiSvc}
 }
 
 func (h *CommentaryHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
@@ -27,7 +27,7 @@ func (h *CommentaryHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	commentary, err := h.geminiSvc.GenerateCommentary(req)
+	commentary, err := h.aiSvc.GenerateCommentary(req)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return

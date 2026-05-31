@@ -13,12 +13,12 @@ import (
 func main() {
 	cfg := config.Load()
 
-	geminiSvc := service.NewGeminiService(cfg.GeminiAPIKey)
+	aiSvc := service.NewAIService(cfg.AIFormat, cfg.AIAPIKey, cfg.AIEndpoint, cfg.AIModel)
 
 	evalHandler := handler.NewEvaluateHandler(cfg)
-	commentaryHandler := handler.NewCommentaryHandler(geminiSvc)
+	commentaryHandler := handler.NewCommentaryHandler(aiSvc)
 	modelsHandler := handler.NewModelsHandler(cfg)
-	tacticsHandler := handler.NewTacticsHandler(geminiSvc)
+	tacticsHandler := handler.NewTacticsHandler(aiSvc)
 
 	mux := http.NewServeMux()
 	mux.HandleFunc("/health", handler.Health)

@@ -8,11 +8,11 @@ import (
 )
 
 type TacticsHandler struct {
-	geminiSvc *service.GeminiService
+	aiSvc *service.AIService
 }
 
-func NewTacticsHandler(geminiSvc *service.GeminiService) *TacticsHandler {
-	return &TacticsHandler{geminiSvc: geminiSvc}
+func NewTacticsHandler(aiSvc *service.AIService) *TacticsHandler {
+	return &TacticsHandler{aiSvc: aiSvc}
 }
 
 func (h *TacticsHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
@@ -27,7 +27,7 @@ func (h *TacticsHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	res, err := h.geminiSvc.AnalyzeTactics(req)
+	res, err := h.aiSvc.AnalyzeTactics(req)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
