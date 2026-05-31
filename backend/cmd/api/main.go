@@ -27,6 +27,7 @@ func main() {
 	tacticsHandler := handler.NewTacticsHandler(aiSvc)
 	libraryHandler := handler.NewLibraryHandler(dbSvc)
 	authHandler := handler.NewAuthHandler(dbSvc, cfg.JWTSecret)
+	playHandler := handler.NewPlayHandler(aiSvc)
 
 	authMiddleware := middleware.NewAuthMiddleware(cfg.JWTSecret)
 
@@ -36,6 +37,7 @@ func main() {
 	mux.Handle("/api/ws/evaluate", evalHandler)
 	mux.Handle("/api/ai/commentary", commentaryHandler)
 	mux.Handle("/api/ai/tactics", tacticsHandler)
+	mux.Handle("/api/ai/play", playHandler)
 
 	// Auth routes
 	mux.HandleFunc("/api/auth/register", authHandler.Register)

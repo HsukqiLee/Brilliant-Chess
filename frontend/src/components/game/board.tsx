@@ -73,22 +73,22 @@ const PIECES_VALUES = {
   k: 0,
 };
 
-const moveSelfSound = new Howl({
+export const moveSelfSound = new Howl({
   src: [`${process.env.NEXT_PUBLIC_BASE_PATH}/sounds/move-self.mp3`],
   preload: true,
 });
 
-const moveOpponentSound = new Howl({
+export const moveOpponentSound = new Howl({
   src: [`${process.env.NEXT_PUBLIC_BASE_PATH}/sounds/move-opponent.mp3`],
   preload: true,
 });
 
-const moveCheckSound = new Howl({
+export const moveCheckSound = new Howl({
   src: [`${process.env.NEXT_PUBLIC_BASE_PATH}/sounds/move-check.mp3`],
   preload: true,
 });
 
-const gameEndSound = new Howl({
+export const gameEndSound = new Howl({
   src: [`${process.env.NEXT_PUBLIC_BASE_PATH}/sounds/game-end.mp3`],
   preload: true,
   volume: 0.25,
@@ -100,12 +100,12 @@ export const gameStartSound = new Howl({
   volume: 0.5,
 });
 
-const captureSound = new Howl({
+export const captureSound = new Howl({
   src: [`${process.env.NEXT_PUBLIC_BASE_PATH}/sounds/capture.mp3`],
   preload: true,
 });
 
-const castleSound = new Howl({
+export const castleSound = new Howl({
   src: [`${process.env.NEXT_PUBLIC_BASE_PATH}/sounds/castle.mp3`],
   preload: true,
 });

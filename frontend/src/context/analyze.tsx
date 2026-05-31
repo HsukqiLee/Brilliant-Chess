@@ -59,7 +59,19 @@ export interface ReviewState {
   loadingExplanation: boolean;
 }
 
-type pageState = "default" | "loading" | "analyze" | "analyzeCustom";
+export interface PlayConfig {
+  color: "w" | "b" | "random";
+  opponent: "stockfish" | "ai";
+  level: number;
+  personality: string;
+}
+
+type pageState =
+  | "default"
+  | "loading"
+  | "analyze"
+  | "analyzeCustom"
+  | "playComputer";
 
 type tabs =
   | "analyze"
@@ -107,6 +119,17 @@ export const AnalyzeContext = createContext<{
   reviewState: [ReviewState, Dispatch<SetStateAction<ReviewState>>];
   evalWorker: [Worker | null, Dispatch<SetStateAction<Worker | null>>];
   evalWorker2: [Worker | null, Dispatch<SetStateAction<Worker | null>>];
+  playConfig: [PlayConfig, Dispatch<SetStateAction<PlayConfig>>];
+  playerColor: ["w" | "b", Dispatch<SetStateAction<"w" | "b">>];
+  computerThinking: [boolean, Dispatch<SetStateAction<boolean>>];
+  chatHistory: [
+    { role: "user" | "ai" | "system"; text: string; name: string }[],
+    Dispatch<
+      SetStateAction<
+        { role: "user" | "ai" | "system"; text: string; name: string }[]
+      >
+    >,
+  ];
   gameController: Controller;
 }>({
   data: [{ format: "fen", string: "" }, () => {}],
@@ -149,6 +172,18 @@ export const AnalyzeContext = createContext<{
   ],
   evalWorker: [null, () => {}],
   evalWorker2: [null, () => {}],
+  playConfig: [
+    {
+      color: "w",
+      opponent: "stockfish",
+      level: 1,
+      personality: "The Chatty Coach",
+    },
+    () => {},
+  ],
+  playerColor: ["w", () => {}],
+  computerThinking: [false, () => {}],
+  chatHistory: [[], () => {}],
   gameController: {
     back: () => {},
     forward: () => {},
@@ -211,6 +246,17 @@ export default function AnalyzeContextProvider(props: {
   });
   const [evalWorker, setEvalWorker] = useState<Worker | null>(null);
   const [evalWorker2, setEvalWorker2] = useState<Worker | null>(null);
+  const [playConfig, setPlayConfig] = useState<PlayConfig>({
+    color: "w",
+    opponent: "stockfish",
+    level: 1,
+    personality: "The Chatty Coach",
+  });
+  const [playerColor, setPlayerColor] = useState<"w" | "b">("w");
+  const [computerThinking, setComputerThinking] = useState(false);
+  const [chatHistory, setChatHistory] = useState<
+    { role: "user" | "ai" | "system"; text: string; name: string }[]
+  >([]);
 
   const moveNumberRef = useRef(moveNumber);
   const customLineRef = useRef(customLine);
@@ -407,6 +453,10 @@ export default function AnalyzeContextProvider(props: {
         reviewState: [reviewState, setReviewState],
         evalWorker: [evalWorker, setEvalWorker],
         evalWorker2: [evalWorker2, setEvalWorker2],
+        playConfig: [playConfig, setPlayConfig],
+        playerColor: [playerColor, setPlayerColor],
+        computerThinking: [computerThinking, setComputerThinking],
+        chatHistory: [chatHistory, setChatHistory],
         gameController,
       }}
     >

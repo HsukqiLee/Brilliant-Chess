@@ -2,7 +2,16 @@
 
 import React, { useEffect, useState, useRef, useContext } from "react";
 
-import Board, { drag, gameStartSound } from "./board";
+import Board, {
+  drag,
+  gameStartSound,
+  moveSelfSound,
+  moveOpponentSound,
+  moveCheckSound,
+  gameEndSound,
+  captureSound,
+  castleSound,
+} from "./board";
 import Clock from "./clock";
 import Name from "./name";
 import Evaluation from "./evaluation";
@@ -121,6 +130,15 @@ export default function Game() {
   const analyzeContext = useContext(AnalyzeContext);
   const errorsContext = useContext(ErrorsContext);
   const configContext = useContext(ConfigContext);
+
+  const [playConfig] = analyzeContext.playConfig;
+  const [playerColor, setPlayerColor] = analyzeContext.playerColor;
+  const [computerThinking, setComputerThinking] =
+    analyzeContext.computerThinking;
+  const [chatHistory, setChatHistory] = analyzeContext.chatHistory;
+
+  const [savingGame, setSavingGame] = useState(false);
+  const [gameSaved, setGameSaved] = useState(false);
 
   const [players, setPlayers] = analyzeContext.players;
   const [time, setTime] = analyzeContext.time;
@@ -825,6 +843,239 @@ export default function Game() {
     }));
   }
 
+  async function getStockfishComputerMove(
+    fen: string,
+    level: number,
+  ): Promise<string> {
+    const worker = engineWorkerRef.current;
+    if (!worker) {
+      throw new Error("Stockfish engine worker is not initialized");
+    }
+    const depths = [1, 3, 5, 8, 11, 14, 17, 20];
+    const currentDepth = depths[level - 1] ?? 8;
+
+    return new Promise<string>((resolve) => {
+      const handleMessage = (e: MessageEvent) => {
+        const line = e.data;
+        if (line.startsWith("bestmove")) {
+          const parts = line.split(" ");
+          const bestMove = parts[1];
+          worker.removeEventListener("message", handleMessage);
+          resolve(bestMove);
+        }
+      };
+      worker.addEventListener("message", handleMessage);
+      worker.postMessage("ucinewgame");
+      worker.postMessage(`position fen ${fen}`);
+      worker.postMessage(`go depth ${currentDepth}`);
+    });
+  }
+
+  async function getAIComputerMove(
+    fen: string,
+    legalMoves: string[],
+    personality: string,
+  ): Promise<{ move: string; comment: string }> {
+    const backendUrl = process.env.NEXT_PUBLIC_BACKEND_URL;
+    if (!backendUrl) {
+      throw new Error("Backend URL is not defined");
+    }
+    const res = await fetch(`${backendUrl}/api/ai/play`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ fen, legalMoves, personality }),
+    });
+    if (!res.ok) {
+      throw new Error(`AI play API returned status ${res.status}`);
+    }
+    const data = await res.json();
+    return {
+      move: data.move,
+      comment: data.comment || "I'm making my move.",
+    };
+  }
+
+  async function triggerComputerMove(fen: string) {
+    setComputerThinking(true);
+    const chess = new Chess(fen);
+    const legalMoves = chess.moves({ verbose: true });
+    if (legalMoves.length === 0) {
+      setComputerThinking(false);
+      return;
+    }
+
+    try {
+      let chosenMoveUci = "";
+      let aiCommentText = "";
+
+      if (playConfig.opponent === "stockfish") {
+        chosenMoveUci = await getStockfishComputerMove(fen, playConfig.level);
+        aiCommentText = `Calculated move.`;
+      } else {
+        const movesList = legalMoves.map(
+          (m) => m.from + m.to + (m.promotion || ""),
+        );
+        const response = await getAIComputerMove(
+          fen,
+          movesList,
+          playConfig.personality,
+        );
+        chosenMoveUci = response.move;
+        aiCommentText = response.comment;
+      }
+
+      const from = chosenMoveUci.substring(0, 2);
+      const to = chosenMoveUci.substring(2, 4);
+      const promotion =
+        chosenMoveUci.length > 4
+          ? (chosenMoveUci.charAt(4) as PieceSymbol)
+          : undefined;
+
+      const unanalyzedMoveObj = chess.move({ from, to, promotion });
+
+      const computerMove: move = {
+        fen: unanalyzedMoveObj.after,
+        movement: [formatSquare(from), formatSquare(to)],
+        color: invertColor(unanalyzedMoveObj.color),
+        capture: unanalyzedMoveObj.captured,
+        castle: getCastle(unanalyzedMoveObj.san),
+        san: unanalyzedMoveObj.san,
+        comment: aiCommentText,
+      };
+
+      if (playConfig.opponent === "ai") {
+        setChatHistory((prev) => [
+          ...prev,
+          { role: "ai", text: aiCommentText, name: playConfig.personality },
+        ]);
+      }
+
+      if (boardSounds) {
+        if (computerMove.castle) {
+          castleSound.play();
+        } else if (computerMove.capture) {
+          captureSound.play();
+        } else if (chess.isCheck()) {
+          moveCheckSound.play();
+        } else {
+          moveOpponentSound.play();
+        }
+      }
+
+      setGame((prev) => [...prev, computerMove]);
+      setMoveNumber((prev) => prev + 1);
+    } catch (err) {
+      console.error("Computer play failed:", err);
+      if (legalMoves.length > 0) {
+        const firstMove = legalMoves[0];
+        const unanalyzedMoveObj = chess.move(firstMove);
+        const computerMove: move = {
+          fen: unanalyzedMoveObj.after,
+          movement: [formatSquare(firstMove.from), formatSquare(firstMove.to)],
+          color: invertColor(unanalyzedMoveObj.color),
+          capture: unanalyzedMoveObj.captured,
+          castle: getCastle(unanalyzedMoveObj.san),
+          san: unanalyzedMoveObj.san,
+          comment: "A standard defense.",
+        };
+        setGame((prev) => [...prev, computerMove]);
+        setMoveNumber((prev) => prev + 1);
+      }
+    } finally {
+      setComputerThinking(false);
+    }
+  }
+
+  useEffect(() => {
+    if (pageState !== "playComputer") return;
+    if (computerThinking) return;
+
+    const lastMove = game[game.length - 1];
+    if (!lastMove) return;
+
+    const chess = new Chess(lastMove.fen);
+    if (chess.isGameOver()) return;
+
+    const currentTurn = chess.turn();
+    const isComputerTurn = currentTurn !== playerColor;
+
+    if (isComputerTurn) {
+      triggerComputerMove(lastMove.fen);
+    }
+  }, [game, playerColor, pageState, computerThinking]);
+
+  async function handleSaveGame() {
+    if (savingGame || gameSaved) return;
+    setSavingGame(true);
+
+    try {
+      const chessForPgn = new Chess();
+      for (let i = 1; i < game.length; i++) {
+        const m = game[i];
+        if (m.san) {
+          chessForPgn.move(m.san);
+        }
+      }
+
+      const playChess = new Chess(game[game.length - 1]?.fen);
+      const opponentName =
+        playConfig.opponent === "stockfish"
+          ? `Stockfish Level ${playConfig.level}`
+          : playConfig.personality;
+
+      chessForPgn.setHeader("Event", "Play vs Computer");
+      chessForPgn.setHeader(
+        "White",
+        playerColor === "w" ? "Player" : opponentName,
+      );
+      chessForPgn.setHeader(
+        "Black",
+        playerColor === "b" ? "Player" : opponentName,
+      );
+      chessForPgn.setHeader(
+        "Result",
+        playChess.isCheckmate()
+          ? playChess.turn() === "w"
+            ? "0-1"
+            : "1-0"
+          : "1/2-1/2",
+      );
+
+      const pgnString = chessForPgn.pgn();
+
+      const backendUrl = process.env.NEXT_PUBLIC_BACKEND_URL;
+      const token = localStorage.getItem("token");
+      if (!backendUrl) {
+        throw new Error("Backend URL not configured");
+      }
+
+      const res = await fetch(`${backendUrl}/api/games`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: token ? `Bearer ${token}` : "",
+        },
+        body: JSON.stringify({ pgn: pgnString }),
+      });
+
+      if (!res.ok) {
+        throw new Error("Failed to save game");
+      }
+
+      setGameSaved(true);
+    } catch (err) {
+      console.error("Save game error:", err);
+      alert("Failed to save game. Make sure you are logged in.");
+    } finally {
+      setSavingGame(false);
+    }
+  }
+
+  function handleExitGame() {
+    setPageState("default");
+    setGameSaved(false);
+  }
+
   async function handleBoardMove(
     previousFen: string,
     movement: { from: string; to: string; promotion?: PieceSymbol },
@@ -833,6 +1084,39 @@ export default function Game() {
     animation: boolean,
     previousBestMoveSan?: string,
   ) {
+    if (pageState === "playComputer") {
+      const chess = new Chess(previousFen);
+      try {
+        const moveObj = chess.move(movement);
+        const playerMove: move = {
+          fen: moveObj.after,
+          movement: [formatSquare(movement.from), formatSquare(movement.to)],
+          color: invertColor(moveObj.color),
+          capture: moveObj.captured,
+          castle: getCastle(moveObj.san),
+          san: moveObj.san,
+        };
+
+        if (boardSounds) {
+          if (playerMove.castle) {
+            castleSound.play();
+          } else if (playerMove.capture) {
+            captureSound.play();
+          } else if (chess.isCheck()) {
+            moveCheckSound.play();
+          } else {
+            moveSelfSound.play();
+          }
+        }
+
+        setGame((prev) => [...prev, playerMove]);
+        setMoveNumber((prev) => prev + 1);
+      } catch (err) {
+        console.error("Illegal move:", err);
+      }
+      return;
+    }
+
     if (reviewState.active) {
       const formattedFrom = formatSquare(movement.from);
       const formattedTo = formatSquare(movement.to);
@@ -987,6 +1271,38 @@ export default function Game() {
     ? ((reviewState.solved ? "victory" : "") as any)
     : shownResult;
 
+  const playChess = new Chess(
+    move?.fen || "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1",
+  );
+  const isGameOver = pageState === "playComputer" && playChess.isGameOver();
+  let gameOverTitle = "";
+  let gameOverDesc = "";
+  if (isGameOver) {
+    if (playChess.isCheckmate()) {
+      gameOverDesc = "Checkmate";
+      const loser = playChess.turn();
+      if (loser === playerColor) {
+        gameOverTitle = "Defeat";
+      } else {
+        gameOverTitle = "Victory";
+      }
+    } else if (playChess.isDraw()) {
+      gameOverTitle = "Draw";
+      if (playChess.isStalemate()) {
+        gameOverDesc = "Stalemate";
+      } else if (playChess.isThreefoldRepetition()) {
+        gameOverDesc = "Threefold repetition";
+      } else if (playChess.isInsufficientMaterial()) {
+        gameOverDesc = "Insufficient material";
+      } else {
+        gameOverDesc = "Draw agreement or 50-move rule";
+      }
+    }
+  }
+
+  const isComputerTurn =
+    pageState === "playComputer" && playChess.turn() !== playerColor;
+
   return (
     <div className="flex flex-col gap-[6px]">
       <div
@@ -1033,40 +1349,91 @@ export default function Game() {
               {formatTime(time)}
             </Clock>
           </div>
-          <Board
-            setPlaying={setPlaying}
-            cleanArrows={cleanCurrentArrows}
-            arrows={getArrows(arrows, moveNumber, customLine)}
-            sacrifice={reviewState.active ? false : move?.sacrifice}
-            forward={reviewState.active ? true : forward}
-            moveRating={boardMoveRating}
-            bestMove={boardBestMove}
-            previousBestMove={boardPreviousBestMove}
-            move={boardMovement}
-            nextMove={boardNextMovement}
-            fen={boardFen}
-            nextFen={boardNextFen}
-            boardSize={boardSize}
-            white={white}
-            animation={reviewState.active ? false : animation}
-            gameEnded={boardGameEnded}
-            capture={reviewState.active ? undefined : move?.capture}
-            nextCapture={reviewState.active ? undefined : nextMove?.capture}
-            castle={reviewState.active ? undefined : move?.castle}
-            nextCastle={reviewState.active ? undefined : nextMove?.castle}
-            setAnimation={setAnimation}
-            result={boardResult}
-            pushArrow={pushArrow}
-            analyzeMove={handleBoardMove}
-            previousStaticEvals={
-              reviewState.active ? undefined : move?.previousStaticEvals
-            }
-            analyzingMove={reviewState.active ? false : analyzingMove}
-            setMaterialAdvantage={setMaterialAdvantage}
-            drag={drag}
-            setDrag={setDrag}
-            bestMoveSan={boardBestMoveSan}
-          />
+          <div className="relative">
+            <Board
+              setPlaying={setPlaying}
+              cleanArrows={cleanCurrentArrows}
+              arrows={getArrows(arrows, moveNumber, customLine)}
+              sacrifice={reviewState.active ? false : move?.sacrifice}
+              forward={reviewState.active ? true : forward}
+              moveRating={boardMoveRating}
+              bestMove={boardBestMove}
+              previousBestMove={boardPreviousBestMove}
+              move={boardMovement}
+              nextMove={boardNextMovement}
+              fen={boardFen}
+              nextFen={boardNextFen}
+              boardSize={boardSize}
+              white={white}
+              animation={reviewState.active ? false : animation}
+              gameEnded={boardGameEnded}
+              capture={reviewState.active ? undefined : move?.capture}
+              nextCapture={reviewState.active ? undefined : nextMove?.capture}
+              castle={reviewState.active ? undefined : move?.castle}
+              nextCastle={reviewState.active ? undefined : nextMove?.castle}
+              setAnimation={setAnimation}
+              result={boardResult}
+              pushArrow={pushArrow}
+              analyzeMove={handleBoardMove}
+              previousStaticEvals={
+                reviewState.active ? undefined : move?.previousStaticEvals
+              }
+              analyzingMove={
+                reviewState.active
+                  ? false
+                  : analyzingMove || isComputerTurn || computerThinking
+              }
+              setMaterialAdvantage={setMaterialAdvantage}
+              drag={drag}
+              setDrag={setDrag}
+              bestMoveSan={boardBestMoveSan}
+            />
+            {isGameOver && (
+              <div className="absolute inset-0 bg-backgroundBox/85 backdrop-blur-md z-[110] flex flex-col items-center justify-center rounded-borderRoundness animate-fadeIn transition-all p-6 text-center">
+                <h2
+                  className={`text-4xl font-extrabold mb-2 ${
+                    gameOverTitle === "Victory"
+                      ? "text-green-500 text-glow-green"
+                      : gameOverTitle === "Defeat"
+                        ? "text-red-500 text-glow-red"
+                        : "text-foregroundGrey"
+                  }`}
+                >
+                  {gameOverTitle === "Victory"
+                    ? "🏆 Victory!"
+                    : gameOverTitle === "Defeat"
+                      ? "💀 Defeat"
+                      : "🤝 Draw"}
+                </h2>
+                <p className="text-lg text-foreground/80 mb-6 font-bold">
+                  {gameOverDesc}
+                </p>
+                <div className="flex flex-col gap-3 w-[70%]">
+                  <button
+                    onClick={handleSaveGame}
+                    disabled={savingGame || gameSaved}
+                    className={`py-3 px-6 rounded-borderRoundness font-bold text-lg transition-all ${
+                      gameSaved
+                        ? "bg-emerald-600/30 border border-emerald-500 text-emerald-400"
+                        : "bg-backgroundBoxBoxHighlighted hover:bg-backgroundBoxBoxHighlightedHover text-foreground hover:shadow-shadowBoxBoxHighlighted"
+                    }`}
+                  >
+                    {savingGame
+                      ? "Saving..."
+                      : gameSaved
+                        ? "Game Saved ✓"
+                        : "Save to Library"}
+                  </button>
+                  <button
+                    onClick={handleExitGame}
+                    className="py-3 px-6 rounded-borderRoundness font-bold text-lg bg-backgroundBoxBox hover:bg-backgroundBoxBoxHover text-foregroundGrey hover:text-foreground transition-all"
+                  >
+                    New Game / Exit
+                  </button>
+                </div>
+              </div>
+            )}
+          </div>
           <div
             style={{ width: boardSize }}
             className="flex flex-row justify-between"
