@@ -10,7 +10,7 @@ RUN npm ci
 COPY . .
 RUN npm run build && rm -rf dist/engine
 
-FROM nginx:1.27-alpine AS runner
+FROM nginx:1.31-alpine AS runner
 WORKDIR /usr/share/nginx/html
 
 COPY --from=builder /app/dist .
