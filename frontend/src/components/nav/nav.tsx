@@ -33,7 +33,7 @@ export default function Nav() {
     {
       label: "Settings",
       hover: openSettings,
-      icon: `${process.env.NEXT_PUBLIC_BASE_PATH}/images/setting.svg`,
+      icon: `${(process.env.NEXT_PUBLIC_BASE_PATH || "")}/images/setting.svg`,
       role: "button",
     },
   ];
@@ -100,7 +100,7 @@ export default function Nav() {
               height={30}
               width={30}
               alt="logo"
-              src={`${process.env.NEXT_PUBLIC_BASE_PATH}/images/logo.svg`}
+              src={`${(process.env.NEXT_PUBLIC_BASE_PATH || "")}/images/logo.svg`}
               className="navTop:mt-[-2px]"
             />
             <div className="h-fit w-fit reduceNav:block hidden">

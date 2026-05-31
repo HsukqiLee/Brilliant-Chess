@@ -33,7 +33,7 @@ export default function BoardMenu() {
         >
           <Image
             className="min-w-[17px]"
-            src={`${process.env.NEXT_PUBLIC_BASE_PATH}/images/settings.svg`}
+            src={`${(process.env.NEXT_PUBLIC_BASE_PATH || "")}/images/settings.svg`}
             title="Settings"
             alt="Settings"
             width={17}
@@ -42,7 +42,7 @@ export default function BoardMenu() {
         </button>
         <button className="outline-none" onClick={flipBoard} type="button">
           <Image
-            src={`${process.env.NEXT_PUBLIC_BASE_PATH}/images/flip.svg`}
+            src={`${(process.env.NEXT_PUBLIC_BASE_PATH || "")}/images/flip.svg`}
             title="Flip Board"
             alt="Flip Board"
             width={17}

@@ -67,7 +67,7 @@ export default function Attributions() {
                 draggable={false}
                 className="rotate-[-20deg]"
                 alt="megaphone"
-                src={`${process.env.NEXT_PUBLIC_BASE_PATH}/images/megaphone.svg`}
+                src={`${(process.env.NEXT_PUBLIC_BASE_PATH || "")}/images/megaphone.svg`}
                 width={50}
                 height={0}
               />
@@ -103,7 +103,7 @@ export default function Attributions() {
               <Image
                 draggable={false}
                 alt="megaphone"
-                src={`${process.env.NEXT_PUBLIC_BASE_PATH}/images/stockfish.webp`}
+                src={`${(process.env.NEXT_PUBLIC_BASE_PATH || "")}/images/stockfish.webp`}
                 width={50}
                 height={0}
               />

@@ -109,7 +109,7 @@ export default function MistakesReview() {
           <Image
             draggable={false}
             alt="review"
-            src={`${process.env.NEXT_PUBLIC_BASE_PATH}/images/type.svg`}
+            src={`${(process.env.NEXT_PUBLIC_BASE_PATH || "")}/images/type.svg`}
             width={45}
             height={45}
           />

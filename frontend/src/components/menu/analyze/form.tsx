@@ -9,24 +9,24 @@ type format = [string, string, string];
 export const FORMATS: format[] = [
   [
     "Chess.com",
-    `${process.env.NEXT_PUBLIC_BASE_PATH}/images/chesscom.svg`,
+    `${(process.env.NEXT_PUBLIC_BASE_PATH || "")}/images/chesscom.svg`,
     "platform",
   ],
   [
     "Lichess.org",
-    `${process.env.NEXT_PUBLIC_BASE_PATH}/images/lichess.svg`,
+    `${(process.env.NEXT_PUBLIC_BASE_PATH || "")}/images/lichess.svg`,
     "platform",
   ],
-  ["PGN", `${process.env.NEXT_PUBLIC_BASE_PATH}/images/pgn.svg`, "format"],
-  ["FEN", `${process.env.NEXT_PUBLIC_BASE_PATH}/images/json.svg`, "format"],
+  ["PGN", `${(process.env.NEXT_PUBLIC_BASE_PATH || "")}/images/pgn.svg`, "format"],
+  ["FEN", `${(process.env.NEXT_PUBLIC_BASE_PATH || "")}/images/json.svg`, "format"],
 ];
 
 type type = [string, string, number];
 
 export const TYPES: type[] = [
-  ["Quick", `${process.env.NEXT_PUBLIC_BASE_PATH}/images/quick.svg`, 15],
-  ["Basic", `${process.env.NEXT_PUBLIC_BASE_PATH}/images/standard.svg`, 18],
-  ["Deep", `${process.env.NEXT_PUBLIC_BASE_PATH}/images/deep.svg`, 21],
+  ["Quick", `${(process.env.NEXT_PUBLIC_BASE_PATH || "")}/images/quick.svg`, 15],
+  ["Basic", `${(process.env.NEXT_PUBLIC_BASE_PATH || "")}/images/standard.svg`, 18],
+  ["Deep", `${(process.env.NEXT_PUBLIC_BASE_PATH || "")}/images/deep.svg`, 21],
 ];
 
 export default function Form(props: {
@@ -277,7 +277,7 @@ export default function Form(props: {
               <h6 className="mt-2 font-bold flex flex-row gap-1">
                 <Image
                   alt="depth"
-                  src={`${process.env.NEXT_PUBLIC_BASE_PATH}/images/formats.svg`}
+                  src={`${(process.env.NEXT_PUBLIC_BASE_PATH || "")}/images/formats.svg`}
                   width={18}
                   height={18}
                 />
@@ -312,7 +312,7 @@ export default function Form(props: {
                 <Image
                   priority
                   alt="depth"
-                  src={`${process.env.NEXT_PUBLIC_BASE_PATH}/images/type.svg`}
+                  src={`${(process.env.NEXT_PUBLIC_BASE_PATH || "")}/images/type.svg`}
                   width={20}
                   height={0}
                 />
@@ -350,7 +350,7 @@ export default function Form(props: {
                     <Image
                       priority
                       alt="engine"
-                      src={`${process.env.NEXT_PUBLIC_BASE_PATH}/images/settings.svg`}
+                      src={`${(process.env.NEXT_PUBLIC_BASE_PATH || "")}/images/settings.svg`}
                       width={20}
                       height={20}
                     />

@@ -1299,10 +1299,10 @@ export function createStockfishWorker(modelId?: string): Worker {
 
   if (!wasmThreadsSupported()) {
     return new window.Worker(
-      `${process.env.NEXT_PUBLIC_BASE_PATH}/engine/stockfish-single.js`,
+      `${(process.env.NEXT_PUBLIC_BASE_PATH || "")}/engine/stockfish-single.js`,
     );
   }
   return new window.Worker(
-    `${process.env.NEXT_PUBLIC_BASE_PATH}/engine/stockfish.js`,
+    `${(process.env.NEXT_PUBLIC_BASE_PATH || "")}/engine/stockfish.js`,
   );
 }

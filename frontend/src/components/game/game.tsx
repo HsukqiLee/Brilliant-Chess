@@ -207,7 +207,7 @@ export default function Game() {
   useEffect(() => {
     (async () => {
       const openingsRes = await fetch(
-        `${process.env.NEXT_PUBLIC_BASE_PATH}/openings/openings.json`,
+        `${(process.env.NEXT_PUBLIC_BASE_PATH || "")}/openings/openings.json`,
       );
       const openings = await openingsRes.json();
       setOpenings(openings as openings);
