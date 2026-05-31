@@ -492,8 +492,8 @@ export default function Library() {
               No saved games in your database yet.
             </span>
             <p className="text-[10px] text-neutral-600 max-w-[200px]">
-              Import a PGN or FEN, analyze it, and click "Save to Library"
-              inside the Summary tab.
+              Import a PGN or FEN, analyze it, and click &quot;Save to
+              Library&quot; inside the Summary tab.
             </p>
           </div>
         ) : (

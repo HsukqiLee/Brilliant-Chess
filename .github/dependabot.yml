@@ -12,9 +12,19 @@ updates:
     schedule:
       interval: "weekly"
 
-  # Maintain Docker images referenced in Dockerfiles and Compose
+  # Maintain Docker images referenced in Dockerfiles
   - package-ecosystem: "docker"
-    directory: "/"
+    directory: "/backend"
+    schedule:
+      interval: "weekly"
+
+  - package-ecosystem: "docker"
+    directory: "/frontend"
+    schedule:
+      interval: "weekly"
+
+  - package-ecosystem: "docker"
+    directory: "/stockfish"
     schedule:
       interval: "weekly"
 
