@@ -1,4 +1,4 @@
-FROM node:22-alpine AS builder
+FROM node:26-alpine AS builder
 WORKDIR /app
 
 ARG NEXT_PUBLIC_BACKEND_URL=/api
