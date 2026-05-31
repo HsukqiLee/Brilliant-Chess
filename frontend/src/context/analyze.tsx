@@ -2,6 +2,7 @@
 
 import { AllGameArrows } from "@/components/game/game";
 import { move, result, square } from "@/engine/stockfish";
+import { apiUrl, getApiBaseUrl } from "@/lib/api";
 import {
   createContext,
   useState,
@@ -299,12 +300,12 @@ export default function AnalyzeContextProvider(props: {
   }, []);
 
   useEffect(() => {
-    const backendUrl = process.env.NEXT_PUBLIC_BACKEND_URL;
+    const backendUrl = getApiBaseUrl();
     if (!backendUrl) return;
 
     async function fetchModels() {
       try {
-        const res = await fetch(`${backendUrl}/api/models`);
+        const res = await fetch(apiUrl("/models"));
         if (res.ok) {
           const data = await res.json();
           setAvailableModels(data.models || []);

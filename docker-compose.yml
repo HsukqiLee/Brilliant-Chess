@@ -30,6 +30,8 @@ services:
       - PORT=8080
       - STOCKFISH_HOST=stockfish
       - DEFAULT_MODEL=sf18
+      - JWT_SECRET=${JWT_SECRET}
+      - CORS_ORIGINS=${CORS_ORIGINS:-http://localhost:3000,http://127.0.0.1:3000}
       - STOCKFISH_PORT_SF18=3333
       - STOCKFISH_PORT_SF17=3334
       - STOCKFISH_PORT_SF16=3335

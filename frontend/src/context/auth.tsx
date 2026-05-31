@@ -7,6 +7,7 @@ import {
   ReactNode,
   useContext,
 } from "react";
+import { apiUrl, getApiBaseUrl } from "@/lib/api";
 
 interface User {
   id: number;
@@ -16,46 +17,49 @@ interface User {
 }
 
 interface AuthContextType {
-  token: string | null;
   user: User | null;
   loadingUser: boolean;
-  login: (token: string) => Promise<void>;
-  logout: () => void;
+  login: () => Promise<void>;
+  logout: () => Promise<void>;
 }
 
 const AuthContext = createContext<AuthContextType>({
-  token: null,
   user: null,
   loadingUser: true,
   login: async () => {},
-  logout: () => {},
+  logout: async () => {},
 });
 
 export function AuthContextProvider({ children }: { children: ReactNode }) {
-  const [token, setToken] = useState<string | null>(null);
   const [user, setUser] = useState<User | null>(null);
   const [loadingUser, setLoadingUser] = useState(true);
 
-  const backendUrl =
-    process.env.NEXT_PUBLIC_BACKEND_URL || "http://localhost:9080";
+  const apiBaseUrl = getApiBaseUrl();
 
-  const fetchProfile = async (authToken: string) => {
+  const clearSession = () => {
+    setUser(null);
+    setLoadingUser(false);
+  };
+
+  const fetchProfile = async () => {
+    if (!apiBaseUrl) {
+      clearSession();
+      return;
+    }
+
     try {
-      const res = await fetch(`${backendUrl}/api/auth/me`, {
-        headers: {
-          Authorization: `Bearer ${authToken}`,
-        },
+      const res = await fetch(apiUrl("/auth/me"), {
+        credentials: "include",
       });
       if (res.ok) {
         const data = await res.json();
         setUser(data);
       } else {
-        // Token invalid or expired
-        logout();
+        clearSession();
       }
     } catch (err) {
       console.error("Failed to fetch profile", err);
-      logout();
+      clearSession();
     } finally {
       setLoadingUser(false);
     }
@@ -63,38 +67,29 @@ export function AuthContextProvider({ children }: { children: ReactNode }) {
 
   useEffect(() => {
     if (typeof window === "undefined") return;
-    const savedToken = window.localStorage.getItem("token");
-    if (savedToken) {
-      setToken(savedToken);
-      fetchProfile(savedToken);
-    } else {
-      setLoadingUser(false);
-    }
+    void fetchProfile();
   }, []);
 
-  const login = async (newToken: string) => {
-    if (typeof window !== "undefined") {
-      window.localStorage.setItem("token", newToken);
-    }
-    setToken(newToken);
+  const login = async () => {
     setLoadingUser(true);
-    await fetchProfile(newToken);
+    await fetchProfile();
   };
 
-  const logout = () => {
-    if (typeof window !== "undefined") {
-      window.localStorage.removeItem("token");
+  const logout = async () => {
+    if (apiBaseUrl) {
+      try {
+        await fetch(apiUrl("/auth/logout"), {
+          method: "POST",
+          credentials: "include",
+        });
+      } catch (err) {
+        console.error("Failed to clear session", err);
+      }
     }
-    setToken(null);
-    setUser(null);
-    setLoadingUser(false);
+    clearSession();
   };
 
-  return (
-    <AuthContext.Provider value={{ token, user, loadingUser, login, logout }}>
-      {children}
-    </AuthContext.Provider>
-  );
+  return <AuthContext.Provider value={{ user, loadingUser, login, logout }}>{children}</AuthContext.Provider>;
 }
 
 export function useAuth() {

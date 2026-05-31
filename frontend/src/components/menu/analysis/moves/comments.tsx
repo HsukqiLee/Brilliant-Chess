@@ -3,6 +3,7 @@
 import { useState, useEffect } from "react";
 import RatingSVG from "@/components/svg/rating";
 import { moveRating } from "@/engine/stockfish";
+import { apiUrl, getApiBaseUrl } from "@/lib/api";
 
 const RATING_FORMATS_GUIDE = {
   _isA_Move: "is a _ move",
@@ -106,7 +107,7 @@ export default function Comments(props: CommentsProps) {
   const [error, setError] = useState<string | null>(null);
   const [aiCache, setAiCache] = useState<Record<string, string>>({});
 
-  const backendUrl = process.env.NEXT_PUBLIC_BACKEND_URL;
+  const backendUrl = getApiBaseUrl();
   const isBackendEnabled = Boolean(backendUrl);
 
   // Reset or load cached AI comment when FEN changes
@@ -134,8 +135,9 @@ export default function Comments(props: CommentsProps) {
     };
 
     try {
-      const response = await fetch(`${backendUrl}/api/ai/commentary`, {
+      const response = await fetch(apiUrl("/ai/commentary"), {
         method: "POST",
+        credentials: "include",
         headers: {
           "Content-Type": "application/json",
         },

@@ -30,6 +30,7 @@ import {
   square,
   createStockfishWorker,
 } from "@/engine/stockfish";
+import { apiUrl, getApiBaseUrl } from "@/lib/api";
 import { Chess, PieceSymbol, WHITE } from "chess.js";
 import {
   getAproxMemory,
@@ -215,7 +216,7 @@ export default function Game() {
   }, []);
 
   useEffect(() => {
-    const isBackend = Boolean(process.env.NEXT_PUBLIC_BACKEND_URL);
+    const isBackend = Boolean(getApiBaseUrl());
     if (isBackend && !selectedModelId) {
       // Wait for backend to finish loading available models
       return;
@@ -874,12 +875,13 @@ export default function Game() {
     legalMoves: string[],
     personality: string,
   ): Promise<{ move: string; comment: string }> {
-    const backendUrl = process.env.NEXT_PUBLIC_BACKEND_URL;
+    const backendUrl = getApiBaseUrl();
     if (!backendUrl) {
       throw new Error("Backend URL is not defined");
     }
-    const res = await fetch(`${backendUrl}/api/ai/play`, {
+    const res = await fetch(apiUrl("/ai/play"), {
       method: "POST",
+      credentials: "include",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ fen, legalMoves, personality }),
     });
@@ -1041,17 +1043,16 @@ export default function Game() {
 
       const pgnString = chessForPgn.pgn();
 
-      const backendUrl = process.env.NEXT_PUBLIC_BACKEND_URL;
-      const token = localStorage.getItem("token");
+      const backendUrl = getApiBaseUrl();
       if (!backendUrl) {
         throw new Error("Backend URL not configured");
       }
 
-      const res = await fetch(`${backendUrl}/api/games`, {
+      const res = await fetch(apiUrl("/games"), {
         method: "POST",
+        credentials: "include",
         headers: {
           "Content-Type": "application/json",
-          Authorization: token ? `Bearer ${token}` : "",
         },
         body: JSON.stringify({ pgn: pgnString }),
       });
@@ -1136,11 +1137,12 @@ export default function Game() {
           loadingExplanation: true,
         }));
 
-        const backendUrl = process.env.NEXT_PUBLIC_BACKEND_URL;
+        const backendUrl = getApiBaseUrl();
         if (backendUrl) {
           try {
-            const res = await fetch(`${backendUrl}/api/ai/tactics`, {
+            const res = await fetch(apiUrl("/ai/tactics"), {
               method: "POST",
+              credentials: "include",
               headers: { "Content-Type": "application/json" },
               body: JSON.stringify({
                 fen: previousFen,

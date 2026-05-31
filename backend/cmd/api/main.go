@@ -12,6 +12,9 @@ import (
 
 func main() {
 	cfg := config.Load()
+	if cfg.JWTSecret == "" {
+		log.Fatal("JWT_SECRET must be set")
+	}
 
 	dbSvc, err := service.NewDBService(cfg)
 	if err != nil {
@@ -43,6 +46,7 @@ func main() {
 	// Auth routes
 	mux.HandleFunc("/api/auth/register", authHandler.Register)
 	mux.HandleFunc("/api/auth/login", authHandler.Login)
+	mux.HandleFunc("/api/auth/logout", authHandler.Logout)
 	mux.Handle("/api/auth/me", authMiddleware.Handler(http.HandlerFunc(authHandler.Me)))
 
 	// Protected Library routes
@@ -51,7 +55,7 @@ func main() {
 	mux.Handle("/api/stats", authMiddleware.Handler(middleware.RequireAuth(libraryHandler)))
 
 	log.Printf("Starting API server on port %s...", cfg.Port)
-	if err := http.ListenAndServe(":"+cfg.Port, middleware.Cors(mux)); err != nil {
+	if err := http.ListenAndServe(":"+cfg.Port, middleware.Cors(mux, cfg.CorsOrigins)); err != nil {
 		log.Fatalf("API server failed: %v", err)
 	}
 }
