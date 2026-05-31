@@ -9,7 +9,7 @@
 }
 
 :root {
-  --background: #302E2B;
+  --background: #302e2b;
   --foreground: #dedede;
 
   --foregroundHighlighted: #ffffff;
@@ -69,8 +69,8 @@
 
   --shadowBoxBoxHighlighted: 0 0 8px;
 
-  --borderRoundness: .25rem;
-  --borderExtraRoundness: .5rem;
+  --borderRoundness: 0.25rem;
+  --borderExtraRoundness: 0.5rem;
 
   --scrollbarSize: 8px;
 }

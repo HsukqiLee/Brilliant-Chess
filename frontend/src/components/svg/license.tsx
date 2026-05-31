@@ -1,10 +1,23 @@
-export default function License(props: { class: string, size?: number, draggable?: boolean }) {
-	const size = props.size ?? 18
-	return (
-		<div draggable={props.draggable}>
-			<svg height={`${size}px`} width={`${size}px`} version="1.1" id="_x32_" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
-				<g>
-					<path className={props.class} d="M500.609,322.275l-57.428-162.834c0.135,0.008,0.279,0.025,0.406,0.025
+export default function License(props: {
+  class: string;
+  size?: number;
+  draggable?: boolean;
+}) {
+  const size = props.size ?? 18;
+  return (
+    <div draggable={props.draggable}>
+      <svg
+        height={`${size}px`}
+        width={`${size}px`}
+        version="1.1"
+        id="_x32_"
+        xmlns="http://www.w3.org/2000/svg"
+        viewBox="0 0 512 512"
+      >
+        <g>
+          <path
+            className={props.class}
+            d="M500.609,322.275l-57.428-162.834c0.135,0.008,0.279,0.025,0.406,0.025
 					c39.538,0.677,49.422-20.58,54.566-27.94c7.118-10.171-7.91-20.343-15.816-13.558c-7.906,6.775-29.264,21.011-70.386,2.024
 					C374.874,102.875,309.87,73.098,271.92,67.399v-39c0-8.799-7.127-15.921-15.918-15.921c-8.795,0-15.922,7.122-15.922,15.921v39
 					c-37.95,5.699-102.953,35.476-140.031,52.593c-41.121,18.987-62.48,4.751-70.386-2.024c-7.906-6.784-22.935,3.388-15.816,13.558
@@ -15,9 +28,10 @@ export default function License(props: { class: string, size?: number, draggable
 					c0,0,0.686-32.969-22.668-32.969c-7.305,0-16.159,0-24.874,0v-23.858h-13.203V141.3h-8.507v-24.23
 					c45.072,3.015,97.457,22.604,134.64,34.072l-60.358,171.134h-11.387c11.496,38.025,46.804,65.736,88.59,65.736
 					c41.79,0,77.098-27.711,88.594-65.736H500.609z M141.243,322.275H35.948L88.595,173L141.243,322.275z M370.758,322.275L423.41,173
-					l52.643,149.275H370.758z"/>
-				</g>
-			</svg>
-		</div>
-	)
+					l52.643,149.275H370.758z"
+          />
+        </g>
+      </svg>
+    </div>
+  );
 }

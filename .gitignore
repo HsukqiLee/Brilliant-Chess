@@ -35,12 +35,9 @@ pnpm-debug.log*
 # temp files
 tmp/
 temp/
-<<<<<<< HEAD
-
-# Go binaries
+# Go binaries and DB files
 backend/main
 backend/main.exe
 main
 main.exe
-=======
->>>>>>> 14267bc3188fc76b621611c64447f7e7453c4e82
+backend/data/

@@ -29,6 +29,10 @@ services:
       - STOCKFISH_PORT_SF17=3334
       - STOCKFISH_PORT_SF16=3335
       - GEMINI_API_KEY=${GEMINI_API_KEY}
+      - DB_TYPE=${DB_TYPE:-sqlite}
+      - DB_DSN=${DB_DSN:-data/chess.db}
+    volumes:
+      - ./backend/data:/app/data
     depends_on:
       - stockfish
 

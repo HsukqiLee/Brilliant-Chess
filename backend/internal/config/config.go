@@ -18,6 +18,9 @@ type Config struct {
 	AIAPIKey      string
 	AIEndpoint    string
 	AIModel       string
+	DBType        string
+	DBDSN         string
+	JWTSecret     string
 }
 
 func Load() *Config {
@@ -75,6 +78,19 @@ func Load() *Config {
 		}
 	}
 
+	dbType := os.Getenv("DB_TYPE")
+	if dbType == "" {
+		dbType = "sqlite"
+	}
+	dbDSN := os.Getenv("DB_DSN")
+	if dbDSN == "" {
+		dbDSN = "data/chess.db"
+	}
+	jwtSecret := os.Getenv("JWT_SECRET")
+	if jwtSecret == "" {
+		jwtSecret = "brilliant-chess-secret-key-123"
+	}
+
 	return &Config{
 		Port:          port,
 		StockfishHost: stockfishHost,
@@ -85,6 +101,8 @@ func Load() *Config {
 		AIAPIKey:      aiAPIKey,
 		AIEndpoint:    aiEndpoint,
 		AIModel:       aiModel,
+		DBType:        dbType,
+		DBDSN:         dbDSN,
+		JWTSecret:     jwtSecret,
 	}
 }
-

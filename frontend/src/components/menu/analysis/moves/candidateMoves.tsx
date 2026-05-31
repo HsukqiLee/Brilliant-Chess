@@ -1,349 +1,375 @@
-"use client"
+"use client";
 
-import { useContext, useEffect, useState } from "react"
-import { AnalyzeContext } from "@/context/analyze"
-import { Chess, PieceSymbol } from "chess.js"
+import { useContext, useEffect, useState } from "react";
+import { AnalyzeContext } from "@/context/analyze";
+import { Chess, PieceSymbol } from "chess.js";
 
 export interface CandidateLine {
-    multipv: number
-    depth: number
-    score: string[]
-    pv: string[]
-    sanMove?: string
-    sanPV?: string[]
+  multipv: number;
+  depth: number;
+  score: string[];
+  pv: string[];
+  sanMove?: string;
+  sanPV?: string[];
 }
 
 export function uciToSan(uci: string, fen: string): string {
-    try {
-        const chess = new Chess(fen)
-        const from = uci.slice(0, 2)
-        const to = uci.slice(2, 4)
-        const promotion = uci[4] as PieceSymbol | undefined
-        const moveObj = chess.move({ from, to, promotion })
-        return moveObj.san
-    } catch {
-        return uci
-    }
+  try {
+    const chess = new Chess(fen);
+    const from = uci.slice(0, 2);
+    const to = uci.slice(2, 4);
+    const promotion = uci[4] as PieceSymbol | undefined;
+    const moveObj = chess.move({ from, to, promotion });
+    return moveObj.san;
+  } catch {
+    return uci;
+  }
 }
 
 export function pvToSanLine(pv: string[], fen: string): string[] {
-    const sanMoves: string[] = []
-    try {
-        const tempChess = new Chess(fen)
-        for (const uci of pv) {
-            const from = uci.slice(0, 2)
-            const to = uci.slice(2, 4)
-            const promotion = uci[4] as PieceSymbol | undefined
-            const moveObj = tempChess.move({ from, to, promotion })
-            sanMoves.push(moveObj.san)
-        }
-    } catch {
-        // stop translation if a move fails (due to incomplete search path)
+  const sanMoves: string[] = [];
+  try {
+    const tempChess = new Chess(fen);
+    for (const uci of pv) {
+      const from = uci.slice(0, 2);
+      const to = uci.slice(2, 4);
+      const promotion = uci[4] as PieceSymbol | undefined;
+      const moveObj = tempChess.move({ from, to, promotion });
+      sanMoves.push(moveObj.san);
     }
-    return sanMoves
+  } catch {
+    // stop translation if a move fails (due to incomplete search path)
+  }
+  return sanMoves;
 }
 
 export function parseInfoLine(line: string, fen: string): CandidateLine | null {
-    const parts = line.split(/\s+/)
-    if (parts[0] !== "info") return null
+  const parts = line.split(/\s+/);
+  if (parts[0] !== "info") return null;
 
-    const multipvIdx = parts.indexOf("multipv")
-    if (multipvIdx === -1) return null
-    const multipv = Number(parts[multipvIdx + 1])
+  const multipvIdx = parts.indexOf("multipv");
+  if (multipvIdx === -1) return null;
+  const multipv = Number(parts[multipvIdx + 1]);
 
-    const depthIdx = parts.indexOf("depth")
-    const depth = depthIdx !== -1 ? Number(parts[depthIdx + 1]) : 0
+  const depthIdx = parts.indexOf("depth");
+  const depth = depthIdx !== -1 ? Number(parts[depthIdx + 1]) : 0;
 
-    // Score parsing
-    const scoreIdx = parts.indexOf("score")
-    let score: string[] = ["cp", "0"]
-    if (scoreIdx !== -1) {
-        const scoreType = parts[scoreIdx + 1] // "cp" or "mate"
-        const scoreVal = parts[scoreIdx + 2]
-        score = [scoreType, scoreVal]
-    }
+  // Score parsing
+  const scoreIdx = parts.indexOf("score");
+  let score: string[] = ["cp", "0"];
+  if (scoreIdx !== -1) {
+    const scoreType = parts[scoreIdx + 1]; // "cp" or "mate"
+    const scoreVal = parts[scoreIdx + 2];
+    score = [scoreType, scoreVal];
+  }
 
-    // PV parsing
-    const pvIdx = parts.indexOf("pv")
-    let pv: string[] = []
-    if (pvIdx !== -1) {
-        pv = parts.slice(pvIdx + 1)
-    }
+  // PV parsing
+  const pvIdx = parts.indexOf("pv");
+  let pv: string[] = [];
+  if (pvIdx !== -1) {
+    pv = parts.slice(pvIdx + 1);
+  }
 
-    if (pv.length === 0) return null
+  if (pv.length === 0) return null;
 
-    const sanMove = uciToSan(pv[0], fen)
-    const sanPV = pvToSanLine(pv, fen)
+  const sanMove = uciToSan(pv[0], fen);
+  const sanPV = pvToSanLine(pv, fen);
 
-    return {
-        multipv,
-        depth,
-        score,
-        pv,
-        sanMove,
-        sanPV,
-    }
+  return {
+    multipv,
+    depth,
+    score,
+    pv,
+    sanMove,
+    sanPV,
+  };
 }
 
 export default function CandidateMoves(props: { fen?: string }) {
-    const { fen } = props
-    const analyzeContext = useContext(AnalyzeContext)
-    const [evalWorker] = analyzeContext.evalWorker
-    const [evalWorker2] = analyzeContext.evalWorker2
+  const { fen } = props;
+  const analyzeContext = useContext(AnalyzeContext);
+  const [evalWorker] = analyzeContext.evalWorker;
+  const [evalWorker2] = analyzeContext.evalWorker2;
 
-    const [compare, setCompare] = useState(false)
+  const [compare, setCompare] = useState(false);
 
-    // Standard / Worker 1 lines
-    const [lines, setLines] = useState<CandidateLine[]>([])
-    const [searching, setSearching] = useState(false)
-    const [depth1, setDepth1] = useState(0)
+  // Standard / Worker 1 lines
+  const [lines, setLines] = useState<CandidateLine[]>([]);
+  const [searching, setSearching] = useState(false);
+  const [depth1, setDepth1] = useState(0);
 
-    // Worker 2 (Deep Comparison) lines
-    const [lines2, setLines2] = useState<CandidateLine[]>([])
-    const [searching2, setSearching2] = useState(false)
-    const [depth2, setDepth2] = useState(0)
+  // Worker 2 (Deep Comparison) lines
+  const [lines2, setLines2] = useState<CandidateLine[]>([]);
+  const [searching2, setSearching2] = useState(false);
+  const [depth2, setDepth2] = useState(0);
 
-    useEffect(() => {
-        if (!fen || !evalWorker) {
-            setLines([])
-            setSearching(false)
-            setDepth1(0)
-            return
-        }
-
-        // Clean up and restart analysis on evalWorker
-        evalWorker.postMessage("stop")
-        setLines([])
-        setSearching(true)
-        setDepth1(0)
-
-        const timeout = setTimeout(() => {
-            evalWorker.postMessage(`position fen ${fen}`)
-            if (compare) {
-                // In comparison mode, worker 1 evaluates at lower depth (fast)
-                evalWorker.postMessage("go depth 12")
-            } else {
-                // Otherwise, normal infinite search
-                evalWorker.postMessage("go infinite")
-            }
-        }, 30)
-
-        function handleMessage(e: MessageEvent) {
-            const line = e.data as string
-            if (typeof line !== "string" || !line.startsWith("info")) {
-                if (line.startsWith("bestmove")) {
-                    setSearching(false)
-                }
-                return
-            }
-
-            const parsed = parseInfoLine(line, fen!)
-            if (parsed) {
-                setDepth1(prev => Math.max(prev, parsed.depth))
-                setLines(prev => {
-                    const filtered = prev.filter(l => l.multipv !== parsed.multipv)
-                    return [...filtered, parsed].sort((a, b) => a.multipv - b.multipv)
-                })
-            }
-        }
-
-        evalWorker.addEventListener("message", handleMessage)
-
-        return () => {
-            clearTimeout(timeout)
-            evalWorker.removeEventListener("message", handleMessage)
-            evalWorker.postMessage("stop")
-        }
-    }, [fen, evalWorker, compare])
-
-    // Effect for evalWorker2 (Deep Worker)
-    useEffect(() => {
-        if (!fen || !evalWorker2 || !compare) {
-            setLines2([])
-            setSearching2(false)
-            setDepth2(0)
-            return
-        }
-
-        // Clean up and restart deep search
-        evalWorker2.postMessage("stop")
-        setLines2([])
-        setSearching2(true)
-        setDepth2(0)
-
-        const timeout = setTimeout(() => {
-            evalWorker2.postMessage(`position fen ${fen}`)
-            evalWorker2.postMessage("go infinite")
-        }, 30)
-
-        function handleMessage2(e: MessageEvent) {
-            const line = e.data as string
-            if (typeof line !== "string" || !line.startsWith("info")) {
-                if (line.startsWith("bestmove")) {
-                    setSearching2(false)
-                }
-                return
-            }
-
-            const parsed = parseInfoLine(line, fen!)
-            if (parsed) {
-                setDepth2(prev => Math.max(prev, parsed.depth))
-                setLines2(prev => {
-                    const filtered = prev.filter(l => l.multipv !== parsed.multipv)
-                    return [...filtered, parsed].sort((a, b) => a.multipv - b.multipv)
-                })
-            }
-        }
-
-        evalWorker2.addEventListener("message", handleMessage2)
-
-        return () => {
-            clearTimeout(timeout)
-            evalWorker2.removeEventListener("message", handleMessage2)
-            evalWorker2.postMessage("stop")
-        }
-    }, [fen, evalWorker2, compare])
-
-    function formatEval(score: string[]) {
-        const type = score[0]
-        const val = Number(score[1])
-        if (type === "mate") {
-            return `M${val}`
-        }
-        const valNum = val / 100
-        const sign = valNum >= 0 ? "+" : ""
-        return `${sign}${valNum.toFixed(2)}`
+  useEffect(() => {
+    if (!fen || !evalWorker) {
+      setLines([]);
+      setSearching(false);
+      setDepth1(0);
+      return;
     }
 
-    if (!fen || !evalWorker) return null
+    // Clean up and restart analysis on evalWorker
+    evalWorker.postMessage("stop");
+    setLines([]);
+    setSearching(true);
+    setDepth1(0);
 
-    return (
-        <div className="w-[85%] flex flex-col gap-2 bg-backgroundBoxDarker rounded-borderRoundness px-3 py-2 border border-neutral-750">
-            <div className="flex flex-row items-center justify-between text-xs font-bold text-foregroundGrey">
-                <span className="flex items-center gap-1.5 font-extrabold">
-                    Engine Evaluation
-                </span>
-                {evalWorker2 && (
-                    <button 
-                        type="button" 
-                        onClick={() => setCompare(!compare)}
-                        className={`text-[9px] font-bold px-1.5 py-0.5 rounded-borderRoundness transition-colors cursor-pointer ${compare ? "bg-highlightGreat text-white font-extrabold" : "bg-backgroundBoxBox hover:bg-backgroundBoxBoxHover text-foregroundGrey"}`}
-                    >
-                        Compare Depths
-                    </button>
-                )}
+    const timeout = setTimeout(() => {
+      evalWorker.postMessage(`position fen ${fen}`);
+      if (compare) {
+        // In comparison mode, worker 1 evaluates at lower depth (fast)
+        evalWorker.postMessage("go depth 12");
+      } else {
+        // Otherwise, normal infinite search
+        evalWorker.postMessage("go infinite");
+      }
+    }, 30);
+
+    function handleMessage(e: MessageEvent) {
+      const line = e.data as string;
+      if (typeof line !== "string" || !line.startsWith("info")) {
+        if (line.startsWith("bestmove")) {
+          setSearching(false);
+        }
+        return;
+      }
+
+      const parsed = parseInfoLine(line, fen!);
+      if (parsed) {
+        setDepth1((prev) => Math.max(prev, parsed.depth));
+        setLines((prev) => {
+          const filtered = prev.filter((l) => l.multipv !== parsed.multipv);
+          return [...filtered, parsed].sort((a, b) => a.multipv - b.multipv);
+        });
+      }
+    }
+
+    evalWorker.addEventListener("message", handleMessage);
+
+    return () => {
+      clearTimeout(timeout);
+      evalWorker.removeEventListener("message", handleMessage);
+      evalWorker.postMessage("stop");
+    };
+  }, [fen, evalWorker, compare]);
+
+  // Effect for evalWorker2 (Deep Worker)
+  useEffect(() => {
+    if (!fen || !evalWorker2 || !compare) {
+      setLines2([]);
+      setSearching2(false);
+      setDepth2(0);
+      return;
+    }
+
+    // Clean up and restart deep search
+    evalWorker2.postMessage("stop");
+    setLines2([]);
+    setSearching2(true);
+    setDepth2(0);
+
+    const timeout = setTimeout(() => {
+      evalWorker2.postMessage(`position fen ${fen}`);
+      evalWorker2.postMessage("go infinite");
+    }, 30);
+
+    function handleMessage2(e: MessageEvent) {
+      const line = e.data as string;
+      if (typeof line !== "string" || !line.startsWith("info")) {
+        if (line.startsWith("bestmove")) {
+          setSearching2(false);
+        }
+        return;
+      }
+
+      const parsed = parseInfoLine(line, fen!);
+      if (parsed) {
+        setDepth2((prev) => Math.max(prev, parsed.depth));
+        setLines2((prev) => {
+          const filtered = prev.filter((l) => l.multipv !== parsed.multipv);
+          return [...filtered, parsed].sort((a, b) => a.multipv - b.multipv);
+        });
+      }
+    }
+
+    evalWorker2.addEventListener("message", handleMessage2);
+
+    return () => {
+      clearTimeout(timeout);
+      evalWorker2.removeEventListener("message", handleMessage2);
+      evalWorker2.postMessage("stop");
+    };
+  }, [fen, evalWorker2, compare]);
+
+  function formatEval(score: string[]) {
+    const type = score[0];
+    const val = Number(score[1]);
+    if (type === "mate") {
+      return `M${val}`;
+    }
+    const valNum = val / 100;
+    const sign = valNum >= 0 ? "+" : "";
+    return `${sign}${valNum.toFixed(2)}`;
+  }
+
+  if (!fen || !evalWorker) return null;
+
+  return (
+    <div className="w-[85%] flex flex-col gap-2 bg-backgroundBoxDarker rounded-borderRoundness px-3 py-2 border border-neutral-750">
+      <div className="flex flex-row items-center justify-between text-xs font-bold text-foregroundGrey">
+        <span className="flex items-center gap-1.5 font-extrabold">
+          Engine Evaluation
+        </span>
+        {evalWorker2 && (
+          <button
+            type="button"
+            onClick={() => setCompare(!compare)}
+            className={`text-[9px] font-bold px-1.5 py-0.5 rounded-borderRoundness transition-colors cursor-pointer ${compare ? "bg-highlightGreat text-white font-extrabold" : "bg-backgroundBoxBox hover:bg-backgroundBoxBoxHover text-foregroundGrey"}`}
+          >
+            Compare Depths
+          </button>
+        )}
+      </div>
+
+      {!compare ? (
+        // Standard mode
+        <>
+          <div className="text-[10px] text-foregroundGrey font-medium opacity-85">
+            Standard Analysis{" "}
+            {searching && depth1 > 0
+              ? `(Depth ${depth1})`
+              : `(Depth ${depth1} done)`}
+          </div>
+          {lines.length === 0 ? (
+            <div className="text-xs text-foregroundGrey py-1">
+              Analyzing position...
             </div>
+          ) : (
+            <ul className="flex flex-col gap-2">
+              {lines.slice(0, 3).map((line) => {
+                const evalText = formatEval(line.score);
+                const isWhiteAdvantage = !evalText.startsWith("-");
+                const scoreBg = isWhiteAdvantage
+                  ? "bg-neutral-200 text-neutral-900 font-extrabold"
+                  : "bg-neutral-800 text-neutral-200 font-extrabold border border-neutral-700/50";
 
-            {!compare ? (
-                // Standard mode
-                <>
-                    <div className="text-[10px] text-foregroundGrey font-medium opacity-85">
-                        Standard Analysis {searching && depth1 > 0 ? `(Depth ${depth1})` : `(Depth ${depth1} done)`}
+                const formattedPV =
+                  line.sanPV && line.sanPV.length > 0
+                    ? line.sanPV.slice(0, 5).join(" ") +
+                      (line.sanPV.length > 5 ? "..." : "")
+                    : "";
+
+                return (
+                  <li
+                    key={line.multipv}
+                    className="flex flex-row gap-2.5 items-center text-xs"
+                  >
+                    <span
+                      className={`text-[10px] px-1.5 py-0.5 rounded-borderRoundness w-[42px] text-center shrink-0 ${scoreBg}`}
+                    >
+                      {evalText}
+                    </span>
+                    <div className="flex flex-col min-w-0 flex-grow">
+                      <span className="font-bold text-foreground truncate">
+                        {line.sanMove}
+                      </span>
+                      <span className="text-[10px] text-foregroundGrey truncate">
+                        {formattedPV}
+                      </span>
                     </div>
-                    {lines.length === 0 ? (
-                        <div className="text-xs text-foregroundGrey py-1">Analyzing position...</div>
-                    ) : (
-                        <ul className="flex flex-col gap-2">
-                            {lines.slice(0, 3).map((line) => {
-                                const evalText = formatEval(line.score)
-                                const isWhiteAdvantage = !evalText.startsWith("-")
-                                const scoreBg = isWhiteAdvantage 
-                                    ? "bg-neutral-200 text-neutral-900 font-extrabold" 
-                                    : "bg-neutral-800 text-neutral-200 font-extrabold border border-neutral-700/50"
-
-                                const formattedPV = line.sanPV && line.sanPV.length > 0
-                                    ? line.sanPV.slice(0, 5).join(" ") + (line.sanPV.length > 5 ? "..." : "")
-                                    : ""
-
-                                return (
-                                    <li key={line.multipv} className="flex flex-row gap-2.5 items-center text-xs">
-                                        <span className={`text-[10px] px-1.5 py-0.5 rounded-borderRoundness w-[42px] text-center shrink-0 ${scoreBg}`}>
-                                            {evalText}
-                                        </span>
-                                        <div className="flex flex-col min-w-0 flex-grow">
-                                            <span className="font-bold text-foreground truncate">
-                                                {line.sanMove}
-                                            </span>
-                                            <span className="text-[10px] text-foregroundGrey truncate">
-                                                {formattedPV}
-                                            </span>
-                                        </div>
-                                    </li>
-                                )
-                            })}
-                        </ul>
-                    )}
-                </>
+                  </li>
+                );
+              })}
+            </ul>
+          )}
+        </>
+      ) : (
+        // Compare mode (Side-by-side)
+        <div className="grid grid-cols-2 gap-3 mt-1.5 border-t border-neutral-700/30 pt-2">
+          {/* Standard / Fast depth */}
+          <div className="flex flex-col gap-1.5 min-w-0">
+            <div className="text-[10px] font-bold text-foregroundGrey uppercase tracking-wider truncate">
+              Fast {depth1 > 0 ? `(D${depth1})` : ""}
+            </div>
+            {lines.length === 0 ? (
+              <div className="text-[10px] text-foregroundGrey">
+                Analyzing...
+              </div>
             ) : (
-                // Compare mode (Side-by-side)
-                <div className="grid grid-cols-2 gap-3 mt-1.5 border-t border-neutral-700/30 pt-2">
-                    {/* Standard / Fast depth */}
-                    <div className="flex flex-col gap-1.5 min-w-0">
-                        <div className="text-[10px] font-bold text-foregroundGrey uppercase tracking-wider truncate">
-                            Fast {depth1 > 0 ? `(D${depth1})` : ""}
-                        </div>
-                        {lines.length === 0 ? (
-                            <div className="text-[10px] text-foregroundGrey">Analyzing...</div>
-                        ) : (
-                            <ul className="flex flex-col gap-2">
-                                {lines.slice(0, 3).map((line) => {
-                                    const evalText = formatEval(line.score)
-                                    const isWhiteAdvantage = !evalText.startsWith("-")
-                                    const scoreBg = isWhiteAdvantage 
-                                        ? "bg-neutral-200 text-neutral-900 font-bold" 
-                                        : "bg-neutral-800 text-neutral-200 border border-neutral-700/50 font-bold"
+              <ul className="flex flex-col gap-2">
+                {lines.slice(0, 3).map((line) => {
+                  const evalText = formatEval(line.score);
+                  const isWhiteAdvantage = !evalText.startsWith("-");
+                  const scoreBg = isWhiteAdvantage
+                    ? "bg-neutral-200 text-neutral-900 font-bold"
+                    : "bg-neutral-800 text-neutral-200 border border-neutral-700/50 font-bold";
 
-                                    return (
-                                        <li key={line.multipv} className="flex flex-col gap-0.5 min-w-0 text-[11px]">
-                                            <div className="flex flex-row items-center gap-1.5">
-                                                <span className={`text-[9px] px-1.2 py-0.2 rounded-borderRoundness w-[32px] text-center shrink-0 font-bold ${scoreBg}`}>
-                                                    {evalText}
-                                                </span>
-                                                <span className="font-bold text-foreground truncate">
-                                                    {line.sanMove}
-                                                </span>
-                                            </div>
-                                        </li>
-                                    )
-                                })}
-                            </ul>
-                        )}
-                    </div>
-
-                    {/* Deep depth */}
-                    <div className="flex flex-col gap-1.5 min-w-0 border-l border-neutral-700/30 pl-3">
-                        <div className="text-[10px] font-bold text-foregroundGrey uppercase tracking-wider truncate">
-                            Deep {depth2 > 0 ? `(D${depth2})` : ""}
-                        </div>
-                        {lines2.length === 0 ? (
-                            <div className="text-[10px] text-foregroundGrey">Analyzing...</div>
-                        ) : (
-                            <ul className="flex flex-col gap-2">
-                                {lines2.slice(0, 3).map((line) => {
-                                    const evalText = formatEval(line.score)
-                                    const isWhiteAdvantage = !evalText.startsWith("-")
-                                    const scoreBg = isWhiteAdvantage 
-                                        ? "bg-neutral-200 text-neutral-900 font-bold" 
-                                        : "bg-neutral-800 text-neutral-200 border border-neutral-700/50 font-bold"
-
-                                    return (
-                                        <li key={line.multipv} className="flex flex-col gap-0.5 min-w-0 text-[11px]">
-                                            <div className="flex flex-row items-center gap-1.5">
-                                                <span className={`text-[9px] px-1.2 py-0.2 rounded-borderRoundness w-[32px] text-center shrink-0 font-bold ${scoreBg}`}>
-                                                    {evalText}
-                                                </span>
-                                                <span className="font-bold text-foreground truncate">
-                                                    {line.sanMove}
-                                                </span>
-                                            </div>
-                                        </li>
-                                    )
-                                })}
-                            </ul>
-                        )}
-                    </div>
-                </div>
+                  return (
+                    <li
+                      key={line.multipv}
+                      className="flex flex-col gap-0.5 min-w-0 text-[11px]"
+                    >
+                      <div className="flex flex-row items-center gap-1.5">
+                        <span
+                          className={`text-[9px] px-1.2 py-0.2 rounded-borderRoundness w-[32px] text-center shrink-0 font-bold ${scoreBg}`}
+                        >
+                          {evalText}
+                        </span>
+                        <span className="font-bold text-foreground truncate">
+                          {line.sanMove}
+                        </span>
+                      </div>
+                    </li>
+                  );
+                })}
+              </ul>
             )}
+          </div>
+
+          {/* Deep depth */}
+          <div className="flex flex-col gap-1.5 min-w-0 border-l border-neutral-700/30 pl-3">
+            <div className="text-[10px] font-bold text-foregroundGrey uppercase tracking-wider truncate">
+              Deep {depth2 > 0 ? `(D${depth2})` : ""}
+            </div>
+            {lines2.length === 0 ? (
+              <div className="text-[10px] text-foregroundGrey">
+                Analyzing...
+              </div>
+            ) : (
+              <ul className="flex flex-col gap-2">
+                {lines2.slice(0, 3).map((line) => {
+                  const evalText = formatEval(line.score);
+                  const isWhiteAdvantage = !evalText.startsWith("-");
+                  const scoreBg = isWhiteAdvantage
+                    ? "bg-neutral-200 text-neutral-900 font-bold"
+                    : "bg-neutral-800 text-neutral-200 border border-neutral-700/50 font-bold";
+
+                  return (
+                    <li
+                      key={line.multipv}
+                      className="flex flex-col gap-0.5 min-w-0 text-[11px]"
+                    >
+                      <div className="flex flex-row items-center gap-1.5">
+                        <span
+                          className={`text-[9px] px-1.2 py-0.2 rounded-borderRoundness w-[32px] text-center shrink-0 font-bold ${scoreBg}`}
+                        >
+                          {evalText}
+                        </span>
+                        <span className="font-bold text-foreground truncate">
+                          {line.sanMove}
+                        </span>
+                      </div>
+                    </li>
+                  );
+                })}
+              </ul>
+            )}
+          </div>
         </div>
-    )
+      )}
+    </div>
+  );
 }

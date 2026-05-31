@@ -13,12 +13,22 @@ import (
 func main() {
 	cfg := config.Load()
 
+	dbSvc, err := service.NewDBService(cfg)
+	if err != nil {
+		log.Fatalf("Failed to initialize database: %v", err)
+	}
+	defer dbSvc.Close()
+
 	aiSvc := service.NewAIService(cfg.AIFormat, cfg.AIAPIKey, cfg.AIEndpoint, cfg.AIModel)
 
 	evalHandler := handler.NewEvaluateHandler(cfg)
 	commentaryHandler := handler.NewCommentaryHandler(aiSvc)
 	modelsHandler := handler.NewModelsHandler(cfg)
 	tacticsHandler := handler.NewTacticsHandler(aiSvc)
+	libraryHandler := handler.NewLibraryHandler(dbSvc)
+	authHandler := handler.NewAuthHandler(dbSvc, cfg.JWTSecret)
+
+	authMiddleware := middleware.NewAuthMiddleware(cfg.JWTSecret)
 
 	mux := http.NewServeMux()
 	mux.HandleFunc("/health", handler.Health)
@@ -26,6 +36,16 @@ func main() {
 	mux.Handle("/api/ws/evaluate", evalHandler)
 	mux.Handle("/api/ai/commentary", commentaryHandler)
 	mux.Handle("/api/ai/tactics", tacticsHandler)
+
+	// Auth routes
+	mux.HandleFunc("/api/auth/register", authHandler.Register)
+	mux.HandleFunc("/api/auth/login", authHandler.Login)
+	mux.Handle("/api/auth/me", authMiddleware.Handler(http.HandlerFunc(authHandler.Me)))
+
+	// Protected Library routes
+	mux.Handle("/api/games", authMiddleware.Handler(middleware.RequireAuth(libraryHandler)))
+	mux.Handle("/api/games/", authMiddleware.Handler(middleware.RequireAuth(libraryHandler)))
+	mux.Handle("/api/stats", authMiddleware.Handler(middleware.RequireAuth(libraryHandler)))
 
 	log.Printf("Starting API server on port %s...", cfg.Port)
 	if err := http.ListenAndServe(":"+cfg.Port, middleware.Cors(mux)); err != nil {
