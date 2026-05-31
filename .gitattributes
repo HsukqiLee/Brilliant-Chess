@@ -1,0 +1,26 @@
+# Set default behavior to automatic text line ending normalization
+* text=auto
+
+# Force LF for source files and config files
+*.go text eol=lf
+*.ts text eol=lf
+*.tsx text eol=lf
+*.js text eol=lf
+*.jsx text eol=lf
+*.json text eol=lf
+*.css text eol=lf
+*.html text eol=lf
+*.yml text eol=lf
+*.yaml text eol=lf
+*.md text eol=lf
+.gitignore text eol=lf
+.gitattributes text eol=lf
+
+# Explicitly treat binary assets as binary to prevent normalization
+*.png -text
+*.jpg -text
+*.jpeg -text
+*.gif -text
+*.ico -text
+*.mp3 -text
+*.wav -text
