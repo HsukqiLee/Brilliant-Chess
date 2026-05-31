@@ -3,6 +3,7 @@
 import { useContext, useEffect, useState } from "react";
 import { AnalyzeContext } from "@/context/analyze";
 import { useAuth } from "@/context/auth";
+import { apiUrl, getApiBaseUrl } from "@/lib/api";
 
 interface GameMeta {
   id: number;
@@ -40,7 +41,7 @@ export default function Library() {
   const [, setPageState] = analyzeContext.pageState;
   const [, setTab] = analyzeContext.tab;
 
-  const { token } = useAuth();
+  const { user, loadingUser } = useAuth();
 
   const [games, setGames] = useState<GameMeta[]>([]);
   const [stats, setStats] = useState<Stats | null>(null);
@@ -48,25 +49,16 @@ export default function Library() {
   const [error, setError] = useState<string | null>(null);
   const [deletingId, setDeletingId] = useState<number | null>(null);
 
-  const backendUrl =
-    process.env.NEXT_PUBLIC_BACKEND_URL || "http://localhost:9080";
+  const backendUrl = getApiBaseUrl();
 
   const fetchData = async () => {
-    if (!token) return;
+    if (!user || !backendUrl) return;
     try {
       setLoading(true);
       setError(null);
       const [gamesRes, statsRes] = await Promise.all([
-        fetch(`${backendUrl}/api/games`, {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        }),
-        fetch(`${backendUrl}/api/stats`, {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        }),
+        fetch(apiUrl("/games"), { credentials: "include" }),
+        fetch(apiUrl("/stats"), { credentials: "include" }),
       ]);
 
       if (!gamesRes.ok || !statsRes.ok) {
@@ -87,19 +79,17 @@ export default function Library() {
   };
 
   useEffect(() => {
-    if (token) {
+    if (user) {
       fetchData();
     }
-  }, [token]);
+  }, [user]);
 
   const handleLoadGame = async (id: number) => {
-    if (!token) return;
+    if (!user || !backendUrl) return;
     try {
       setPageState("loading");
-      const res = await fetch(`${backendUrl}/api/games/${id}`, {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
+      const res = await fetch(apiUrl(`/games/${id}`), {
+        credentials: "include",
       });
       if (!res.ok) {
         throw new Error("Failed to fetch game details");
@@ -119,7 +109,7 @@ export default function Library() {
 
   const handleDeleteGame = async (id: number, e: React.MouseEvent) => {
     e.stopPropagation();
-    if (!token) return;
+    if (!user || !backendUrl) return;
     if (
       !confirm("Are you sure you want to delete this game from your library?")
     ) {
@@ -128,11 +118,9 @@ export default function Library() {
 
     try {
       setDeletingId(id);
-      const res = await fetch(`${backendUrl}/api/games/${id}`, {
+      const res = await fetch(apiUrl(`/games/${id}`), {
         method: "DELETE",
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
+        credentials: "include",
       });
 
       if (!res.ok) {
@@ -143,10 +131,8 @@ export default function Library() {
       setGames((prev) => prev.filter((g) => g.id !== id));
 
       // Refetch stats to keep everything updated
-      const statsRes = await fetch(`${backendUrl}/api/stats`, {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
+      const statsRes = await fetch(apiUrl("/stats"), {
+        credentials: "include",
       });
       if (statsRes.ok) {
         const statsData = await statsRes.json();
@@ -304,7 +290,34 @@ export default function Library() {
   };
 
   // Render CTA if not logged in
-  if (!token) {
+  if (loadingUser) {
+    return (
+      <div className="flex flex-col flex-grow items-center justify-center p-8 text-neutral-400 gap-2">
+        <svg
+          className="animate-spin h-8 w-8 text-neutral-500"
+          fill="none"
+          viewBox="0 0 24 24"
+        >
+          <circle
+            className="opacity-25"
+            cx="12"
+            cy="12"
+            r="10"
+            stroke="currentColor"
+            strokeWidth="4"
+          ></circle>
+          <path
+            className="opacity-75"
+            fill="currentColor"
+            d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+          ></path>
+        </svg>
+        <span className="text-sm font-medium">Loading session...</span>
+      </div>
+    );
+  }
+
+  if (!user) {
     return (
       <div className="flex flex-col flex-grow items-center justify-center p-8 text-center text-neutral-400 gap-4 max-w-sm mx-auto select-none">
         <div className="w-16 h-16 rounded-full bg-neutral-900 border border-neutral-800 flex items-center justify-center text-neutral-500 shadow-inner">

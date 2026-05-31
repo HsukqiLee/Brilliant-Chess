@@ -2,9 +2,10 @@
 
 import { useState } from "react";
 import { useAuth } from "@/context/auth";
+import { apiUrl } from "@/lib/api";
 
 export default function ProfileMenu() {
-  const { token, user, loadingUser, login, logout } = useAuth();
+  const { user, loadingUser, login, logout } = useAuth();
 
   const [activeTab, setActiveTab] = useState<"login" | "register">("login");
   const [username, setUsername] = useState("");
@@ -13,9 +14,6 @@ export default function ProfileMenu() {
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState<string | null>(null);
-
-  const backendUrl =
-    process.env.NEXT_PUBLIC_BACKEND_URL || "http://localhost:9080";
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -27,8 +25,9 @@ export default function ProfileMenu() {
     try {
       setSubmitting(true);
       setError(null);
-      const res = await fetch(`${backendUrl}/api/auth/login`, {
+      const res = await fetch(apiUrl("/auth/login"), {
         method: "POST",
+        credentials: "include",
         headers: {
           "Content-Type": "application/json",
         },
@@ -36,8 +35,8 @@ export default function ProfileMenu() {
       });
 
       const data = await res.json();
-      if (res.ok && data.token) {
-        await login(data.token);
+      if (res.ok && data.success) {
+        await login();
         setUsername("");
         setPassword("");
       } else {
@@ -71,8 +70,9 @@ export default function ProfileMenu() {
     try {
       setSubmitting(true);
       setError(null);
-      const res = await fetch(`${backendUrl}/api/auth/register`, {
+      const res = await fetch(apiUrl("/auth/register"), {
         method: "POST",
+        credentials: "include",
         headers: {
           "Content-Type": "application/json",
         },
@@ -124,7 +124,6 @@ export default function ProfileMenu() {
     );
   }
 
-  // Render profile details if logged in
   if (user) {
     const formattedDate = new Date(user.createdAt).toLocaleDateString(
       undefined,
@@ -138,7 +137,6 @@ export default function ProfileMenu() {
     return (
       <div className="flex flex-col gap-5 px-6 py-4 overflow-y-auto max-h-[calc(100vh-140px)] select-text">
         <div className="bg-neutral-900/60 p-5 rounded-xl border border-neutral-800 flex flex-col items-center gap-4 text-center">
-          {/* Avatar */}
           <div className="w-16 h-16 rounded-full bg-gradient-to-tr from-emerald-600 to-teal-400 flex items-center justify-center text-white text-2xl font-extrabold shadow-inner select-none">
             {user.username.substring(0, 2).toUpperCase()}
           </div>
@@ -170,7 +168,7 @@ export default function ProfileMenu() {
 
         <button
           type="button"
-          onClick={logout}
+          onClick={() => void logout()}
           className="w-full text-sm font-bold py-3 rounded-xl bg-red-950/40 hover:bg-red-900/40 border border-red-900/30 hover:border-red-900/65 text-red-400 active:scale-95 transition-all cursor-pointer text-center select-none"
         >
           Log Out
@@ -181,7 +179,6 @@ export default function ProfileMenu() {
 
   return (
     <div className="flex flex-col gap-4 px-6 py-4 overflow-y-auto max-h-[calc(100vh-140px)]">
-      {/* Tab Switcher */}
       <div className="flex bg-neutral-950/50 p-1 rounded-xl border border-neutral-900/50 select-none">
         <button
           type="button"
@@ -226,7 +223,6 @@ export default function ProfileMenu() {
         </p>
       </div>
 
-      {/* Status Alerts */}
       {error && (
         <div className="bg-red-950/20 border border-red-900/30 text-red-400 p-3 rounded-lg text-xs font-medium text-center">
           {error}
@@ -238,7 +234,6 @@ export default function ProfileMenu() {
         </div>
       )}
 
-      {/* Form */}
       <form
         onSubmit={activeTab === "login" ? handleLogin : handleRegister}
         className="flex flex-col gap-3.5"

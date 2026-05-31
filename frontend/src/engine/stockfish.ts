@@ -14,6 +14,7 @@ import {
 } from "chess.js";
 import { SetStateAction } from "react";
 import { BackendWorker } from "./backendWorker";
+import { apiWebSocketUrl, getApiBaseUrl } from "@/lib/api";
 import { wasmSupported, wasmThreadsSupported } from "./wasmChecks";
 
 export type result = "1-0" | "0-1" | "1/2-1/2" | "*" | "";
@@ -1287,16 +1288,9 @@ export function parsePGN(
 }
 
 export function createStockfishWorker(modelId?: string): Worker {
-  const backendUrl = process.env.NEXT_PUBLIC_BACKEND_URL;
+  const backendUrl = getApiBaseUrl();
   if (backendUrl) {
-    const normalizedBackendUrl = backendUrl.replace(/\/$/, "");
-    const websocketBase = /^https?:\/\//i.test(normalizedBackendUrl)
-      ? normalizedBackendUrl.replace(/^http/i, "ws")
-      : normalizedBackendUrl;
-    const websocketPath = normalizedBackendUrl.endsWith("/api")
-      ? "/ws/evaluate"
-      : "/api/ws/evaluate";
-    let wsUrl = `${websocketBase}${websocketPath}`;
+    let wsUrl = apiWebSocketUrl("/ws/evaluate");
     if (modelId) {
       wsUrl += `?model=${encodeURIComponent(modelId)}`;
     }

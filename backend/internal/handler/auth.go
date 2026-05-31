@@ -37,7 +37,6 @@ type LoginRequest struct {
 
 type AuthResponse struct {
 	Success bool   `json:"success"`
-	Token   string `json:"token,omitempty"`
 	Error   string `json:"error,omitempty"`
 }
 
@@ -124,8 +123,21 @@ func (h *AuthHandler) Login(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	http.SetCookie(w, middleware.NewAuthCookie(r, tokenString, 7*24*60*60))
+
 	w.Header().Set("Content-Type", "application/json")
-	json.NewEncoder(w).Encode(AuthResponse{Success: true, Token: tokenString})
+	json.NewEncoder(w).Encode(AuthResponse{Success: true})
+}
+
+func (h *AuthHandler) Logout(w http.ResponseWriter, r *http.Request) {
+	if r.Method != http.MethodPost {
+		http.Error(w, "Method not allowed", http.StatusMethodNotAllowed)
+		return
+	}
+
+	http.SetCookie(w, middleware.ClearAuthCookie(r))
+	w.Header().Set("Content-Type", "application/json")
+	json.NewEncoder(w).Encode(AuthResponse{Success: true})
 }
 
 func (h *AuthHandler) Me(w http.ResponseWriter, r *http.Request) {

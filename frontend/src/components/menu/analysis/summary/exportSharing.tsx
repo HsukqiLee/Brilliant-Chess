@@ -4,6 +4,7 @@ import { useContext, useState } from "react";
 import { AnalyzeContext, players } from "@/context/analyze";
 import { move } from "@/engine/stockfish";
 import { useAuth } from "@/context/auth";
+import { apiUrl, getApiBaseUrl } from "@/lib/api";
 
 type ExportSharingProps = {
   moves: move[];
@@ -15,7 +16,7 @@ export default function ExportSharing({ moves, players }: ExportSharingProps) {
   const [result] = analyzeContext.result;
   const [time] = analyzeContext.time;
   const [, setTab] = analyzeContext.tab;
-  const { token } = useAuth();
+  const { user } = useAuth();
 
   const [includeEval, setIncludeEval] = useState(true);
   const [includeComments, setIncludeComments] = useState(true);
@@ -176,7 +177,7 @@ export default function ExportSharing({ moves, players }: ExportSharingProps) {
   const [saveStatus, setSaveStatus] = useState("");
 
   async function saveToLibrary() {
-    if (!token) {
+    if (!user) {
       setTab("profile");
       return;
     }
@@ -250,13 +251,16 @@ export default function ExportSharing({ moves, players }: ExportSharingProps) {
 
       const fullPgn = generatePGNString(true, true); // Save the fully annotated game
 
-      const backendUrl =
-        process.env.NEXT_PUBLIC_BACKEND_URL || "http://localhost:9080";
-      const res = await fetch(`${backendUrl}/api/games`, {
+      const backendUrl = getApiBaseUrl();
+      if (!backendUrl) {
+        throw new Error("Backend URL not configured");
+      }
+
+      const res = await fetch(apiUrl("/games"), {
         method: "POST",
+        credentials: "include",
         headers: {
           "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`,
         },
         body: JSON.stringify({
           pgn: fullPgn,
@@ -339,7 +343,7 @@ export default function ExportSharing({ moves, players }: ExportSharingProps) {
           onClick={saveToLibrary}
           className="w-full text-xs font-bold py-2 rounded-borderRoundness bg-emerald-600 hover:bg-emerald-500 text-white active:scale-95 transition-all cursor-pointer text-center font-extrabold"
         >
-          {!token ? "Log in to Save" : saveStatus || "Save to Library"}
+          {!user ? "Log in to Save" : saveStatus || "Save to Library"}
         </button>
       </div>
     </div>

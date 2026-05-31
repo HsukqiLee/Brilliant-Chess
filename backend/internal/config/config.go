@@ -21,8 +21,34 @@ type Config struct {
 	DBType        string
 	DBDSN         string
 	JWTSecret     string
+	CorsOrigins   []string
 	RedisAddr     string
 	RedisPassword string
+}
+
+func parseList(value string) []string {
+	if value == "" {
+		return nil
+	}
+
+	parts := []string{}
+	current := ""
+	for _, ch := range value {
+		if ch == ',' {
+			if current != "" {
+				parts = append(parts, current)
+			}
+			current = ""
+			continue
+		}
+		if ch != ' ' && ch != '\t' && ch != '\n' && ch != '\r' {
+			current += string(ch)
+		}
+	}
+	if current != "" {
+		parts = append(parts, current)
+	}
+	return parts
 }
 
 func Load() *Config {
@@ -89,9 +115,7 @@ func Load() *Config {
 		dbDSN = "data/chess.db"
 	}
 	jwtSecret := os.Getenv("JWT_SECRET")
-	if jwtSecret == "" {
-		jwtSecret = "brilliant-chess-secret-key-123"
-	}
+	corsOrigins := parseList(os.Getenv("CORS_ORIGINS"))
 
 	redisAddr := os.Getenv("REDIS_ADDR")
 	redisPassword := os.Getenv("REDIS_PASSWORD")
@@ -109,6 +133,7 @@ func Load() *Config {
 		DBType:        dbType,
 		DBDSN:         dbDSN,
 		JWTSecret:     jwtSecret,
+		CorsOrigins:   corsOrigins,
 		RedisAddr:     redisAddr,
 		RedisPassword: redisPassword,
 	}
