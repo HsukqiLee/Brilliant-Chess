@@ -1,0 +1,19 @@
+version: 2
+updates:
+  # Maintain dependencies for Node/npm frontend
+  - package-ecosystem: "npm"
+    directory: "/frontend"
+    schedule:
+      interval: "weekly"
+
+  # Maintain dependencies for Go backend
+  - package-ecosystem: "gomod"
+    directory: "/backend"
+    schedule:
+      interval: "weekly"
+
+  # Maintain Docker images referenced in Dockerfiles and Compose
+  - package-ecosystem: "docker"
+    directory: "/"
+    schedule:
+      interval: "weekly"
