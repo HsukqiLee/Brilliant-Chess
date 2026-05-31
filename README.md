@@ -49,4 +49,43 @@ npm run build
 npm run start
 ```
 
-If you deploy with Docker, `frontend/Dockerfile` builds the backend-only production image and `frontend/Dockerfile.full` keeps the local/offline wasm engine assets.
+If you deploy with Docker, `frontend/Dockerfile` builds the backend-only production image and `frontend/Dockerfile.full` keeps the local/offline wasm engine assets. The default frontend image proxies `/api` to the backend container, so the browser can reach the API through the same origin.
+
+## Server Deployment
+
+Recommended layout:
+
+- Frontend container on port `3000`
+- Backend container on port `9080`
+- Reverse proxy on `80/443` that sends all browser traffic to the frontend container
+
+The frontend container already forwards `/api/` to the backend container, so the external proxy only needs to point the public domain to the frontend.
+
+### Nginx Example
+
+```nginx
+server {
+	listen 80;
+	server_name chess.example.com;
+
+	location / {
+		proxy_pass http://127.0.0.1:3000;
+		proxy_http_version 1.1;
+		proxy_set_header Host $host;
+		proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+		proxy_set_header X-Forwarded-Proto $scheme;
+		proxy_set_header Upgrade $http_upgrade;
+		proxy_set_header Connection "upgrade";
+	}
+}
+```
+
+### Caddy Example
+
+```caddy
+chess.example.com {
+	reverse_proxy 127.0.0.1:3000
+}
+```
+
+If you prefer exposing the backend separately, you can point `/api/` to port `9080` instead and keep the frontend on port `3000`.

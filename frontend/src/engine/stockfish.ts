@@ -1289,7 +1289,14 @@ export function parsePGN(
 export function createStockfishWorker(modelId?: string): Worker {
   const backendUrl = process.env.NEXT_PUBLIC_BACKEND_URL;
   if (backendUrl) {
-    let wsUrl = backendUrl.replace(/^http/, "ws") + "/api/ws/evaluate";
+    const normalizedBackendUrl = backendUrl.replace(/\/$/, "");
+    const websocketBase = /^https?:\/\//i.test(normalizedBackendUrl)
+      ? normalizedBackendUrl.replace(/^http/i, "ws")
+      : normalizedBackendUrl;
+    const websocketPath = normalizedBackendUrl.endsWith("/api")
+      ? "/ws/evaluate"
+      : "/api/ws/evaluate";
+    let wsUrl = `${websocketBase}${websocketPath}`;
     if (modelId) {
       wsUrl += `?model=${encodeURIComponent(modelId)}`;
     }
