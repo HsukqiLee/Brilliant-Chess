@@ -258,8 +258,8 @@ export function Arrow(props: {
     const arrowHeadHeight = lineWidth * 1.6;
     const arrowHeadWidth = squareSize / 2;
 
-    const height = shortLineLength + lineWidth / 2;
-    const width = longLineLength + squareSize / 4 - arrowHeadHeight;
+    const height = Math.max(0, shortLineLength + lineWidth / 2);
+    const width = Math.max(0, longLineLength + squareSize / 4 - arrowHeadHeight);
 
     const longLineCenter = height - lineWidth / 2;
     const shortLineCenter = arrowHeadWidth / 2;
@@ -313,11 +313,11 @@ export function Arrow(props: {
   const angle = Math.atan2(distance.x, distance.y);
   const degs = angle * (180 / Math.PI);
 
-  const width = squareSize / 2;
+  const width = Math.max(0, squareSize / 2);
   const lineCenter = width / 2;
   const lineWidth = width * (3 / 7);
   const arrowHeadHeight = lineWidth * 1.6;
-  const height = realDistance - arrowHeadHeight;
+  const height = Math.max(0, realDistance - arrowHeadHeight);
 
   const positionX = `${toElementPosition.x + squareSize / 2 - width / 2}px`;
   const positionY = `${toElementPosition.y + squareSize / 2 - (white ? 0 : height)}px`;
