@@ -41,7 +41,7 @@ export default function getOverallGameComment(
 
   const getComment = (commentList: string[], winner: string, loser: string) => {
     const tab = [
-      `<span class="font-extrabold" style="color: var(--foregroundBlackDark);">`,
+      `<span class="font-extrabold" style="color: var(--foregroundHighlighted);">`,
       `</span>`,
     ];
 

@@ -218,16 +218,16 @@ export default function CandidateMoves(props: { fen?: string }) {
   if (!fen || !evalWorker) return null;
 
   return (
-    <div className="w-[85%] flex flex-col gap-2 bg-backgroundBoxDarker rounded-borderRoundness px-3 py-2 border border-neutral-750">
-      <div className="flex flex-row items-center justify-between text-xs font-bold text-foregroundGrey">
-        <span className="flex items-center gap-1.5 font-extrabold">
+    <div className="w-[85%] flex flex-col gap-2.5 bg-backgroundBoxBox/45 border border-white/5 backdrop-blur-md rounded-borderRoundness px-3 py-2.5 shadow-sm transition-all duration-300">
+      <div className="flex flex-row items-center justify-between text-[11px] font-bold text-foregroundGrey/90">
+        <span className="flex items-center gap-1.5 font-extrabold text-foregroundHighlighted">
           Engine Evaluation
         </span>
         {evalWorker2 && (
           <button
             type="button"
             onClick={() => setCompare(!compare)}
-            className={`text-[9px] font-bold px-1.5 py-0.5 rounded-borderRoundness transition-colors cursor-pointer ${compare ? "bg-highlightGreat text-white font-extrabold" : "bg-backgroundBoxBox hover:bg-backgroundBoxBoxHover text-foregroundGrey"}`}
+            className={`text-[9px] font-extrabold px-2 py-0.5 rounded-borderRoundness transition-all duration-200 cursor-pointer border ${compare ? "bg-backgroundBoxBoxHighlighted border-transparent text-foreground shadow-sm" : "bg-backgroundBoxBox/30 border-white/5 hover:bg-backgroundBoxBox/50 text-foregroundGrey hover:text-foregroundHighlighted"}`}
           >
             Compare Depths
           </button>
@@ -237,24 +237,24 @@ export default function CandidateMoves(props: { fen?: string }) {
       {!compare ? (
         // Standard mode
         <>
-          <div className="text-[10px] text-foregroundGrey font-medium opacity-85">
+          <div className="text-[9px] text-foregroundGrey/70 font-extrabold uppercase tracking-wider">
             Standard Analysis{" "}
             {searching && depth1 > 0
               ? `(Depth ${depth1})`
               : `(Depth ${depth1} done)`}
           </div>
           {lines.length === 0 ? (
-            <div className="text-xs text-foregroundGrey py-1">
+            <div className="text-xs text-foregroundGrey/50 py-2 italic font-medium animate-pulse">
               Analyzing position...
             </div>
           ) : (
-            <ul className="flex flex-col gap-2">
+            <ul className="flex flex-col gap-1.5">
               {lines.slice(0, 3).map((line) => {
                 const evalText = formatEval(line.score);
                 const isWhiteAdvantage = !evalText.startsWith("-");
                 const scoreBg = isWhiteAdvantage
-                  ? "bg-neutral-200 text-neutral-900 font-extrabold"
-                  : "bg-neutral-800 text-neutral-200 font-extrabold border border-neutral-700/50";
+                  ? "bg-white/95 text-black font-extrabold shadow-sm"
+                  : "bg-neutral-900/90 text-white font-extrabold border border-white/10 shadow-sm";
 
                 const formattedPV =
                   line.sanPV && line.sanPV.length > 0
@@ -265,7 +265,7 @@ export default function CandidateMoves(props: { fen?: string }) {
                 return (
                   <li
                     key={line.multipv}
-                    className="flex flex-row gap-2.5 items-center text-xs"
+                    className="flex flex-row gap-2.5 items-center text-xs hover:bg-white/5 px-2 py-1 rounded transition-colors duration-150"
                   >
                     <span
                       className={`text-[10px] px-1.5 py-0.5 rounded-borderRoundness w-[42px] text-center shrink-0 ${scoreBg}`}
@@ -273,10 +273,10 @@ export default function CandidateMoves(props: { fen?: string }) {
                       {evalText}
                     </span>
                     <div className="flex flex-col min-w-0 flex-grow">
-                      <span className="font-bold text-foreground truncate">
+                      <span className="font-extrabold text-foregroundHighlighted truncate">
                         {line.sanMove}
                       </span>
-                      <span className="text-[10px] text-foregroundGrey truncate">
+                      <span className="text-[10px] text-foregroundGrey/80 truncate font-medium">
                         {formattedPV}
                       </span>
                     </div>
@@ -288,37 +288,37 @@ export default function CandidateMoves(props: { fen?: string }) {
         </>
       ) : (
         // Compare mode (Side-by-side)
-        <div className="grid grid-cols-2 gap-3 mt-1.5 border-t border-neutral-700/30 pt-2">
+        <div className="grid grid-cols-2 gap-3 mt-1 border-t border-white/5 pt-2">
           {/* Standard / Fast depth */}
           <div className="flex flex-col gap-1.5 min-w-0">
-            <div className="text-[10px] font-bold text-foregroundGrey uppercase tracking-wider truncate">
+            <div className="text-[9px] font-extrabold text-foregroundGrey/70 uppercase tracking-wider truncate">
               Fast {depth1 > 0 ? `(D${depth1})` : ""}
             </div>
             {lines.length === 0 ? (
-              <div className="text-[10px] text-foregroundGrey">
+              <div className="text-[10px] text-foregroundGrey/40 italic py-1 animate-pulse">
                 Analyzing...
               </div>
             ) : (
-              <ul className="flex flex-col gap-2">
+              <ul className="flex flex-col gap-1">
                 {lines.slice(0, 3).map((line) => {
                   const evalText = formatEval(line.score);
                   const isWhiteAdvantage = !evalText.startsWith("-");
                   const scoreBg = isWhiteAdvantage
-                    ? "bg-neutral-200 text-neutral-900 font-bold"
-                    : "bg-neutral-800 text-neutral-200 border border-neutral-700/50 font-bold";
+                    ? "bg-white/95 text-black font-bold shadow-sm"
+                    : "bg-neutral-900/90 text-white border border-white/10 font-bold shadow-sm";
 
                   return (
                     <li
                       key={line.multipv}
-                      className="flex flex-col gap-0.5 min-w-0 text-[11px]"
+                      className="flex flex-col gap-0.5 min-w-0 text-[11px] hover:bg-white/5 px-1.5 py-0.5 rounded transition-colors duration-150"
                     >
                       <div className="flex flex-row items-center gap-1.5">
                         <span
-                          className={`text-[9px] px-1.2 py-0.2 rounded-borderRoundness w-[32px] text-center shrink-0 font-bold ${scoreBg}`}
+                          className={`text-[9px] px-1.5 py-0.2 rounded-borderRoundness w-[32px] text-center shrink-0 font-bold ${scoreBg}`}
                         >
                           {evalText}
                         </span>
-                        <span className="font-bold text-foreground truncate">
+                        <span className="font-extrabold text-foregroundHighlighted truncate">
                           {line.sanMove}
                         </span>
                       </div>
@@ -330,35 +330,35 @@ export default function CandidateMoves(props: { fen?: string }) {
           </div>
 
           {/* Deep depth */}
-          <div className="flex flex-col gap-1.5 min-w-0 border-l border-neutral-700/30 pl-3">
-            <div className="text-[10px] font-bold text-foregroundGrey uppercase tracking-wider truncate">
+          <div className="flex flex-col gap-1.5 min-w-0 border-l border-white/5 pl-3">
+            <div className="text-[9px] font-extrabold text-foregroundGrey/70 uppercase tracking-wider truncate">
               Deep {depth2 > 0 ? `(D${depth2})` : ""}
             </div>
             {lines2.length === 0 ? (
-              <div className="text-[10px] text-foregroundGrey">
+              <div className="text-[10px] text-foregroundGrey/40 italic py-1 animate-pulse">
                 Analyzing...
               </div>
             ) : (
-              <ul className="flex flex-col gap-2">
+              <ul className="flex flex-col gap-1">
                 {lines2.slice(0, 3).map((line) => {
                   const evalText = formatEval(line.score);
                   const isWhiteAdvantage = !evalText.startsWith("-");
                   const scoreBg = isWhiteAdvantage
-                    ? "bg-neutral-200 text-neutral-900 font-bold"
-                    : "bg-neutral-800 text-neutral-200 border border-neutral-700/50 font-bold";
+                    ? "bg-white/95 text-black font-bold shadow-sm"
+                    : "bg-neutral-900/90 text-white border border-white/10 font-bold shadow-sm";
 
                   return (
                     <li
                       key={line.multipv}
-                      className="flex flex-col gap-0.5 min-w-0 text-[11px]"
+                      className="flex flex-col gap-0.5 min-w-0 text-[11px] hover:bg-white/5 px-1.5 py-0.5 rounded transition-colors duration-150"
                     >
                       <div className="flex flex-row items-center gap-1.5">
                         <span
-                          className={`text-[9px] px-1.2 py-0.2 rounded-borderRoundness w-[32px] text-center shrink-0 font-bold ${scoreBg}`}
+                          className={`text-[9px] px-1.5 py-0.2 rounded-borderRoundness w-[32px] text-center shrink-0 font-bold ${scoreBg}`}
                         >
                           {evalText}
                         </span>
-                        <span className="font-bold text-foreground truncate">
+                        <span className="font-extrabold text-foregroundHighlighted truncate">
                           {line.sanMove}
                         </span>
                       </div>

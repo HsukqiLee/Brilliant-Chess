@@ -123,18 +123,18 @@ export default function VariationExplorer() {
   }
 
   return (
-    <div className="w-[85%] flex flex-col gap-2 bg-backgroundBoxDarker rounded-borderRoundness px-3 py-2">
+    <div className="w-[85%] flex flex-col gap-2.5 bg-backgroundBoxBox/45 border border-white/5 backdrop-blur-md rounded-borderRoundness px-3 py-2.5 shadow-sm transition-all duration-300">
       <div className="flex flex-row items-center justify-between">
-        <div className="font-extrabold text-foregroundGrey">
+        <div className="font-extrabold text-foregroundHighlighted text-[11px]">
           Variation Explorer
         </div>
-        <div className="flex flex-row gap-2">
+        <div className="flex flex-row gap-1.5 select-none shrink-0">
           {hasLine ? (
             <button
               type="button"
               disabled={analyzingMove}
               onClick={saveVariation}
-              className="text-sm font-bold px-2 py-1 rounded-borderRoundness bg-backgroundBoxBox hover:bg-backgroundBoxBoxHover disabled:opacity-50"
+              className="text-[9px] font-extrabold px-2 py-1 rounded-borderRoundness transition-all duration-200 border cursor-pointer bg-backgroundBoxBox/30 border-white/5 hover:bg-backgroundBoxBox/60 text-foregroundGrey hover:text-foregroundHighlighted disabled:opacity-50 disabled:cursor-not-allowed shadow-sm"
             >
               Save
             </button>
@@ -144,7 +144,7 @@ export default function VariationExplorer() {
               type="button"
               disabled={analyzingMove}
               onClick={openLine}
-              className="text-sm font-bold px-2 py-1 rounded-borderRoundness bg-backgroundBoxBox hover:bg-backgroundBoxBoxHover disabled:opacity-50"
+              className="text-[9px] font-extrabold px-2 py-1 rounded-borderRoundness transition-all duration-200 border cursor-pointer bg-backgroundBoxBox/30 border-white/5 hover:bg-backgroundBoxBox/60 text-foregroundGrey hover:text-foregroundHighlighted disabled:opacity-50 disabled:cursor-not-allowed shadow-sm"
             >
               Open
             </button>
@@ -154,7 +154,7 @@ export default function VariationExplorer() {
               type="button"
               disabled={analyzingMove}
               onClick={returnToMainline}
-              className="text-sm font-bold px-2 py-1 rounded-borderRoundness bg-backgroundBoxBox hover:bg-backgroundBoxBoxHover disabled:opacity-50"
+              className="text-[9px] font-extrabold px-2 py-1 rounded-borderRoundness transition-all duration-200 border cursor-pointer bg-backgroundBoxBox/30 border-white/5 hover:bg-backgroundBoxBox/60 text-foregroundGrey hover:text-foregroundHighlighted disabled:opacity-50 disabled:cursor-not-allowed shadow-sm"
             >
               Back
             </button>
@@ -164,16 +164,16 @@ export default function VariationExplorer() {
               type="button"
               disabled={analyzingMove}
               onClick={clearLine}
-              className="text-sm font-bold px-2 py-1 rounded-borderRoundness bg-backgroundBoxBox hover:bg-backgroundBoxBoxHover disabled:opacity-50"
+              className="text-[9px] font-extrabold px-2 py-1 rounded-borderRoundness transition-all duration-200 border cursor-pointer bg-backgroundBoxBox/30 border-white/5 hover:bg-backgroundBoxBox/60 text-foregroundGrey hover:text-foregroundHighlighted disabled:opacity-50 disabled:cursor-not-allowed shadow-sm"
             >
               Clear
             </button>
           ) : null}
         </div>
       </div>
-      <div className="text-xs text-foregroundGrey">{baseLabel}</div>
+      <div className="text-[10px] text-foregroundGrey/65 font-semibold mt-0.5">{baseLabel}</div>
       {hasLine ? (
-        <ul className="flex flex-col gap-1">
+        <ul className="flex flex-col gap-1.5">
           {customLine.moves.map((move, index) => {
             const ply = baseMoveNumber + 1 + index;
             const plyLabel = getPlyLabel(ply);
@@ -188,9 +188,9 @@ export default function VariationExplorer() {
                   type="button"
                   disabled={analyzingMove}
                   onClick={() => jumpToMove(index)}
-                  className={`text-left w-full px-2 py-1 rounded-borderRoundness ${isActive ? "bg-backgroundBoxBox text-foreground" : "text-foregroundGrey hover:bg-backgroundBoxBox"}`}
+                  className={`text-left w-full px-2.5 py-1 rounded-borderRoundness text-xs transition-all duration-150 cursor-pointer ${isActive ? "bg-backgroundBoxBoxHighlighted/20 border border-highlightBest/25 text-highlightBest font-extrabold" : "text-foregroundGrey/90 hover:text-foregroundHighlighted hover:bg-white/5 border border-transparent font-semibold"}`}
                 >
-                  <span className="font-bold mr-2">{plyLabel}</span>
+                  <span className="font-bold mr-2 opacity-75">{plyLabel}</span>
                   <span className="font-extrabold">{move.san}</span>
                 </button>
               </li>
@@ -198,15 +198,15 @@ export default function VariationExplorer() {
           })}
         </ul>
       ) : (
-        <div className="text-xs text-foregroundGrey">
+        <div className="text-[10px] text-foregroundGrey/50 italic py-1 mt-0.5 font-medium">
           Make a move on the board to start a variation.
         </div>
       )}
-      <div className="border-t border-neutral-700/40 pt-2 text-xs text-foregroundGrey">
+      <div className="border-t border-white/5 pt-2 text-[10px] font-extrabold text-foregroundGrey/70 uppercase tracking-wider mt-1 px-0.5">
         Saved variations
       </div>
       {sortedVariations.length ? (
-        <ul className="flex flex-col gap-1">
+        <ul className="flex flex-col gap-1.5 max-h-[140px] overflow-y-auto pr-1">
           {sortedVariations.map((line) => {
             const lineBaseMove = mainlineMoves[line.baseMoveNumber];
             const lineLabel =
@@ -215,15 +215,15 @@ export default function VariationExplorer() {
                 : `After ${getPlyLabel(line.baseMoveNumber)} ${lineBaseMove?.san ?? ""}`;
 
             return (
-              <li key={line.id} className="flex flex-row items-center gap-2">
+              <li key={line.id} className="flex flex-row items-center gap-2 bg-backgroundBoxBox/20 hover:bg-backgroundBoxBox/35 border border-white/5 hover:border-white/10 px-2.5 py-1.5 rounded-borderRoundness transition-colors duration-150">
                 <button
                   type="button"
                   disabled={analyzingMove}
                   onClick={() => loadVariation(line.id)}
-                  className="text-left w-full px-2 py-1 rounded-borderRoundness text-foregroundGrey hover:bg-backgroundBoxBox"
+                  className="text-left flex-grow text-xs text-foregroundGrey hover:text-foregroundHighlighted bg-transparent border-none p-0 cursor-pointer flex flex-col gap-0.5"
                 >
-                  <span className="font-bold mr-2">{line.name}</span>
-                  <span className="text-[10px] opacity-80">
+                  <span className="font-extrabold text-foregroundHighlighted text-xs">{line.name}</span>
+                  <span className="text-[9px] text-foregroundGrey/70 font-semibold">
                     {lineLabel} • {line.moves.length} moves
                   </span>
                 </button>
@@ -231,7 +231,7 @@ export default function VariationExplorer() {
                   type="button"
                   disabled={analyzingMove}
                   onClick={() => deleteVariation(line.id)}
-                  className="text-xs font-bold px-2 py-1 rounded-borderRoundness bg-backgroundBoxBox hover:bg-backgroundBoxBoxHover disabled:opacity-50"
+                  className="text-[9px] font-extrabold px-2 py-1 rounded-borderRoundness transition-all duration-200 border cursor-pointer bg-red-950/20 border-red-900/35 hover:bg-red-900/40 text-red-400 hover:text-red-300 disabled:opacity-50 disabled:cursor-not-allowed shadow-sm shrink-0"
                 >
                   Delete
                 </button>
@@ -240,7 +240,7 @@ export default function VariationExplorer() {
           })}
         </ul>
       ) : (
-        <div className="text-xs text-foregroundGrey">
+        <div className="text-xs text-foregroundGrey/40 italic py-1 px-0.5">
           No saved variations yet.
         </div>
       )}

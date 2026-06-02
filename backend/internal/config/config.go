@@ -51,6 +51,11 @@ func parseList(value string) []string {
 	return parts
 }
 
+func isDocker() bool {
+	_, err := os.Stat("/.dockerenv")
+	return err == nil
+}
+
 func Load() *Config {
 	port := os.Getenv("PORT")
 	if port == "" {
@@ -58,7 +63,11 @@ func Load() *Config {
 	}
 	stockfishHost := os.Getenv("STOCKFISH_HOST")
 	if stockfishHost == "" {
-		stockfishHost = "stockfish"
+		if isDocker() {
+			stockfishHost = "stockfish"
+		} else {
+			stockfishHost = "127.0.0.1"
+		}
 	}
 	geminiAPIKey := os.Getenv("GEMINI_API_KEY")
 
@@ -97,11 +106,12 @@ func Load() *Config {
 	aiEndpoint := os.Getenv("AI_ENDPOINT")
 	aiModel := os.Getenv("AI_MODEL")
 	if aiModel == "" {
-		if aiFormat == "gemini" {
+		switch aiFormat {
+		case "gemini":
 			aiModel = "gemini-2.5-flash"
-		} else if aiFormat == "openai" {
+		case "openai":
 			aiModel = "gpt-4o-mini"
-		} else if aiFormat == "anthropic" {
+		case "anthropic":
 			aiModel = "claude-3-5-sonnet-20241022"
 		}
 	}
@@ -115,9 +125,19 @@ func Load() *Config {
 		dbDSN = "data/chess.db"
 	}
 	jwtSecret := os.Getenv("JWT_SECRET")
+	if jwtSecret == "" {
+		jwtSecret = "dev_secret_key_brilliant_chess_change_me"
+	}
 	corsOrigins := parseList(os.Getenv("CORS_ORIGINS"))
 
 	redisAddr := os.Getenv("REDIS_ADDR")
+	if redisAddr == "" {
+		if isDocker() {
+			redisAddr = "redis:6379"
+		} else {
+			redisAddr = "127.0.0.1:6379"
+		}
+	}
 	redisPassword := os.Getenv("REDIS_PASSWORD")
 
 	return &Config{

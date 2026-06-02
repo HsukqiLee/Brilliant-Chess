@@ -83,3 +83,45 @@ body {
   scrollbar-width: var(--scrollbarSize);
   scrollbar-color: var(--scrollbarColor) transparent;
 }
+
+/* Custom Chess UI Animations and Glowing Utilities */
+@keyframes glow-brilliant {
+  0%, 100% { box-shadow: 0 0 4px rgba(38, 194, 163, 0.15), inset 0 0 1px rgba(38, 194, 163, 0.15); border-color: rgba(38, 194, 163, 0.25); }
+  50% { box-shadow: 0 0 12px rgba(38, 194, 163, 0.4), inset 0 0 2px rgba(38, 194, 163, 0.25); border-color: rgba(38, 194, 163, 0.5); }
+}
+@keyframes glow-best {
+  0%, 100% { box-shadow: 0 0 4px rgba(129, 182, 76, 0.15), inset 0 0 1px rgba(129, 182, 76, 0.15); border-color: rgba(129, 182, 76, 0.25); }
+  50% { box-shadow: 0 0 12px rgba(129, 182, 76, 0.4), inset 0 0 2px rgba(129, 182, 76, 0.25); border-color: rgba(129, 182, 76, 0.5); }
+}
+@keyframes glow-blunder {
+  0%, 100% { box-shadow: 0 0 4px rgba(250, 65, 45, 0.15), inset 0 0 1px rgba(250, 65, 45, 0.15); border-color: rgba(250, 65, 45, 0.25); }
+  50% { box-shadow: 0 0 12px rgba(250, 65, 45, 0.4), inset 0 0 2px rgba(250, 65, 45, 0.25); border-color: rgba(250, 65, 45, 0.5); }
+}
+@keyframes glow-mistake {
+  0%, 100% { box-shadow: 0 0 4px rgba(255, 164, 89, 0.15), inset 0 0 1px rgba(255, 164, 89, 0.15); border-color: rgba(255, 164, 89, 0.25); }
+  50% { box-shadow: 0 0 12px rgba(255, 164, 89, 0.4), inset 0 0 2px rgba(255, 164, 89, 0.25); border-color: rgba(255, 164, 89, 0.5); }
+}
+@keyframes glow-miss {
+  0%, 100% { box-shadow: 0 0 4px rgba(255, 119, 105, 0.15), inset 0 0 1px rgba(255, 119, 105, 0.15); border-color: rgba(255, 119, 105, 0.25); }
+  50% { box-shadow: 0 0 12px rgba(255, 119, 105, 0.4), inset 0 0 2px rgba(255, 119, 105, 0.25); border-color: rgba(255, 119, 105, 0.5); }
+}
+@keyframes glow-normal {
+  0%, 100% { box-shadow: 0 0 2px rgba(255, 255, 255, 0.05); border-color: rgba(255, 255, 255, 0.05); }
+  50% { box-shadow: 0 0 6px rgba(255, 255, 255, 0.1); border-color: rgba(255, 255, 255, 0.1); }
+}
+
+.glow-brilliant { animation: glow-brilliant 3s infinite ease-in-out; }
+.glow-best { animation: glow-best 3s infinite ease-in-out; }
+.glow-blunder { animation: glow-blunder 3s infinite ease-in-out; }
+.glow-mistake { animation: glow-mistake 3s infinite ease-in-out; }
+.glow-miss { animation: glow-miss 3s infinite ease-in-out; }
+.glow-normal { animation: glow-normal 3s infinite ease-in-out; }
+
+.animate-fade-in {
+  animation: fadeIn 0.2s ease-out forwards;
+}
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(4px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+

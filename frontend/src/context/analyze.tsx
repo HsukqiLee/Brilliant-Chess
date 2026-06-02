@@ -320,7 +320,7 @@ export default function AnalyzeContextProvider(props: {
           }
         }
       } catch (err) {
-        console.error("Failed to fetch Stockfish models:", err);
+        console.warn("Failed to fetch Stockfish models (ignoring in WASM/offline mode):", err);
       }
     }
     fetchModels();

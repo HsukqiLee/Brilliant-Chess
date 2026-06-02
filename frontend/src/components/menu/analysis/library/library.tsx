@@ -150,7 +150,7 @@ export default function Library() {
   const renderTrendChart = () => {
     if (!stats || !stats.accuracyTrend || stats.accuracyTrend.length < 2) {
       return (
-        <div className="h-28 flex items-center justify-center text-xs text-neutral-500 border border-dashed border-neutral-700 rounded-lg">
+        <div className="h-28 flex items-center justify-center text-xs text-foregroundGrey/50 border border-dashed border-white/5 rounded-borderRoundness bg-backgroundBoxBox/20 italic font-medium">
           Analyze and save more games to see accuracy trend
         </div>
       );
@@ -194,18 +194,18 @@ export default function Library() {
     });
 
     return (
-      <div className="w-full bg-neutral-900/60 p-3 rounded-lg border border-neutral-800">
+      <div className="w-full bg-backgroundBoxBox/45 border border-white/5 backdrop-blur-md p-3 rounded-borderRoundness shadow-sm transition-all duration-300">
         <div className="flex justify-between items-center mb-2">
-          <span className="text-xs font-semibold text-neutral-400">
+          <span className="text-[10px] font-extrabold text-foregroundGrey/90 uppercase tracking-wider">
             Accuracy Trend (Last {trend.length} games)
           </span>
-          <div className="flex gap-3 text-[10px]">
+          <div className="flex gap-3 text-[9px] font-bold text-foregroundGrey/70 select-none">
             <span className="flex items-center gap-1">
-              <span className="w-2.5 h-0.5 bg-blue-400 inline-block"></span>{" "}
+              <span className="w-2 h-2 rounded-full bg-highlightBrilliant inline-block"></span>{" "}
               White
             </span>
             <span className="flex items-center gap-1">
-              <span className="w-2.5 h-0.5 bg-amber-400 inline-block"></span>{" "}
+              <span className="w-2 h-2 rounded-full bg-highlightBest inline-block"></span>{" "}
               Black
             </span>
           </div>
@@ -222,16 +222,18 @@ export default function Library() {
                     y1={y}
                     x2={width - paddingRight}
                     y2={y}
-                    stroke="#2d2d2d"
+                    stroke="rgba(255,255,255,0.05)"
                     strokeWidth="0.5"
                     strokeDasharray="2,2"
                   />
                   <text
                     x={paddingLeft - 5}
                     y={y + 3}
-                    fill="#555"
+                    fill="var(--foregroundGrey)"
+                    opacity="0.6"
                     fontSize="7"
                     textAnchor="end"
+                    fontWeight="bold"
                   >
                     {val}%
                   </text>
@@ -243,7 +245,7 @@ export default function Library() {
             <path
               d={whitePath}
               fill="none"
-              stroke="#3b82f6"
+              stroke="var(--highlightBrilliant)"
               strokeWidth="1.5"
               strokeLinecap="round"
               strokeLinejoin="round"
@@ -252,7 +254,7 @@ export default function Library() {
             <path
               d={blackPath}
               fill="none"
-              stroke="#f59e0b"
+              stroke="var(--highlightBest)"
               strokeWidth="1.5"
               strokeLinecap="round"
               strokeLinejoin="round"
@@ -268,7 +270,7 @@ export default function Library() {
                     cx={whiteCoords.x}
                     cy={whiteCoords.y}
                     r="2.5"
-                    fill="#3b82f6"
+                    fill="var(--highlightBrilliant)"
                     stroke="#171717"
                     strokeWidth="1"
                   />
@@ -276,7 +278,7 @@ export default function Library() {
                     cx={blackCoords.x}
                     cy={blackCoords.y}
                     r="2.5"
-                    fill="#f59e0b"
+                    fill="var(--highlightBest)"
                     stroke="#171717"
                     strokeWidth="1"
                   />
@@ -292,9 +294,9 @@ export default function Library() {
   // Render CTA if not logged in
   if (loadingUser) {
     return (
-      <div className="flex flex-col flex-grow items-center justify-center p-8 text-neutral-400 gap-2">
+      <div className="flex flex-col flex-grow items-center justify-center p-8 text-foregroundGrey/60 gap-2">
         <svg
-          className="animate-spin h-8 w-8 text-neutral-500"
+          className="animate-spin h-8 w-8 text-foregroundGrey/40"
           fill="none"
           viewBox="0 0 24 24"
         >
@@ -312,17 +314,17 @@ export default function Library() {
             d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
           ></path>
         </svg>
-        <span className="text-sm font-medium">Loading session...</span>
+        <span className="text-xs font-semibold">Loading session...</span>
       </div>
     );
   }
 
   if (!user) {
     return (
-      <div className="flex flex-col flex-grow items-center justify-center p-8 text-center text-neutral-400 gap-4 max-w-sm mx-auto select-none">
-        <div className="w-16 h-16 rounded-full bg-neutral-900 border border-neutral-800 flex items-center justify-center text-neutral-500 shadow-inner">
+      <div className="flex flex-col flex-grow items-center justify-center p-6 text-center text-foregroundGrey/90 gap-4 max-w-[360px] mx-auto select-none animate-fade-in">
+        <div className="w-14 h-14 rounded-full bg-backgroundBoxBox/45 border border-white/5 flex items-center justify-center text-foregroundGrey shadow-md select-none animate-pulse-subtle">
           <svg
-            className="w-8 h-8"
+            className="w-7 h-7"
             fill="none"
             stroke="currentColor"
             viewBox="0 0 24 24"
@@ -336,17 +338,17 @@ export default function Library() {
           </svg>
         </div>
         <div>
-          <h3 className="font-bold text-lg text-neutral-200">
+          <h3 className="font-extrabold text-base text-foregroundHighlighted">
             Sign in to access your Library
           </h3>
-          <p className="text-xs text-neutral-500 mt-2 leading-relaxed">
+          <p className="text-xs text-foregroundGrey/70 mt-2 leading-relaxed font-semibold">
             All your saved chess games, average centipawn loss trends, and
             accuracy summaries will be safely backed up and synced here.
           </p>
         </div>
         <button
           onClick={() => setTab("profile")}
-          className="w-full text-xs font-bold py-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white active:scale-95 transition-all cursor-pointer text-center"
+          className="w-full text-xs font-extrabold py-2.5 rounded-borderRoundness bg-backgroundBoxBoxHighlighted hover:bg-backgroundBoxBoxHighlightedHover text-foreground transition-all duration-200 cursor-pointer text-center border-none shadow-sm hover:shadow-shadowBoxBoxHighlighted active:scale-[0.98]"
         >
           Go to Profile
         </button>
@@ -356,9 +358,9 @@ export default function Library() {
 
   if (loading) {
     return (
-      <div className="flex flex-col flex-grow items-center justify-center p-8 text-neutral-400 gap-2">
+      <div className="flex flex-col flex-grow items-center justify-center p-8 text-foregroundGrey/60 gap-2">
         <svg
-          className="animate-spin h-8 w-8 text-neutral-500"
+          className="animate-spin h-8 w-8 text-foregroundGrey/40"
           fill="none"
           viewBox="0 0 24 24"
         >
@@ -376,16 +378,16 @@ export default function Library() {
             d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
           ></path>
         </svg>
-        <span className="text-sm font-medium">Loading personal library...</span>
+        <span className="text-xs font-semibold">Loading personal library...</span>
       </div>
     );
   }
 
   if (error) {
     return (
-      <div className="flex flex-col flex-grow items-center justify-center p-8 text-center text-red-400 gap-3">
+      <div className="flex flex-col flex-grow items-center justify-center p-8 text-center text-highlightBlunder gap-3">
         <svg
-          className="w-12 h-12 text-red-500/80"
+          className="w-12 h-12 text-highlightBlunder/80"
           fill="none"
           stroke="currentColor"
           viewBox="0 0 24 24"
@@ -398,16 +400,16 @@ export default function Library() {
           ></path>
         </svg>
         <div>
-          <h3 className="font-bold text-lg text-neutral-200">
+          <h3 className="font-extrabold text-base text-foregroundHighlighted">
             Failed to Load Library
           </h3>
-          <p className="text-xs text-neutral-400 mt-1 max-w-xs mx-auto">
+          <p className="text-xs text-foregroundGrey/70 mt-1.5 max-w-xs mx-auto font-semibold">
             {error}
           </p>
         </div>
         <button
           onClick={fetchData}
-          className="px-4 py-1.5 bg-neutral-800 hover:bg-neutral-700 text-neutral-200 text-xs font-semibold rounded-md border border-neutral-700 transition-colors"
+          className="px-4 py-1.5 bg-backgroundBoxBox hover:bg-backgroundBoxBoxHover border border-white/5 text-foregroundGrey hover:text-foregroundHighlighted text-xs font-bold rounded transition-colors cursor-pointer"
         >
           Try Again
         </button>
@@ -420,30 +422,30 @@ export default function Library() {
   const drawCount = stats?.gamesByResult["1/2-1/2"] || 0;
 
   return (
-    <div className="flex flex-col gap-4 px-4 py-2 overflow-y-auto max-h-[calc(100vh-140px)]">
+    <div className="flex flex-col gap-4 px-4 py-2 overflow-y-auto max-h-[calc(100vh-140px)] w-full animate-fade-in">
       {/* Stats Dashboard */}
-      <div className="grid grid-cols-3 gap-2.5">
-        <div className="bg-neutral-900/60 p-3 rounded-lg border border-neutral-800 flex flex-col justify-center items-center text-center">
-          <span className="text-[10px] uppercase font-bold text-neutral-500 tracking-wider">
+      <div className="grid grid-cols-3 gap-2 shrink-0">
+        <div className="bg-backgroundBoxBox/45 border border-white/5 backdrop-blur-md p-2.5 rounded-borderRoundness flex flex-col justify-center items-center text-center shadow-sm">
+          <span className="text-[9px] uppercase font-extrabold text-foregroundGrey/70 tracking-wider">
             Total Games
           </span>
-          <span className="text-2xl font-extrabold text-neutral-200 mt-1">
+          <span className="text-xl font-black text-foregroundHighlighted mt-1">
             {stats?.totalGames ?? 0}
           </span>
         </div>
-        <div className="bg-neutral-900/60 p-3 rounded-lg border border-neutral-800 flex flex-col justify-center items-center text-center">
-          <span className="text-[10px] uppercase font-bold text-neutral-500 tracking-wider">
+        <div className="bg-backgroundBoxBox/45 border border-white/5 backdrop-blur-md p-2.5 rounded-borderRoundness flex flex-col justify-center items-center text-center shadow-sm">
+          <span className="text-[9px] uppercase font-extrabold text-foregroundGrey/70 tracking-wider">
             Avg Accuracy
           </span>
-          <span className="text-2xl font-extrabold text-emerald-400 mt-1">
+          <span className="text-xl font-black text-highlightBest mt-1">
             {stats?.averageAccuracy ? stats.averageAccuracy.toFixed(1) : "0.0"}%
           </span>
         </div>
-        <div className="bg-neutral-900/60 p-3 rounded-lg border border-neutral-800 flex flex-col justify-center items-center text-center">
-          <span className="text-[10px] uppercase font-bold text-neutral-500 tracking-wider">
+        <div className="bg-backgroundBoxBox/45 border border-white/5 backdrop-blur-md p-2.5 rounded-borderRoundness flex flex-col justify-center items-center text-center shadow-sm">
+          <span className="text-[9px] uppercase font-extrabold text-foregroundGrey/70 tracking-wider">
             Avg CPL
           </span>
-          <span className="text-2xl font-extrabold text-blue-400 mt-1">
+          <span className="text-xl font-black text-highlightGreat mt-1">
             {stats?.averageCpl ? stats.averageCpl.toFixed(0) : "0"}
           </span>
         </div>
@@ -451,27 +453,27 @@ export default function Library() {
 
       {/* W/L Record Bar */}
       {games.length > 0 && (
-        <div className="bg-neutral-900/60 p-3 rounded-lg border border-neutral-800 flex flex-col gap-1.5">
-          <div className="flex justify-between text-xs font-semibold text-neutral-400">
+        <div className="bg-backgroundBoxBox/45 border border-white/5 backdrop-blur-md p-3 rounded-borderRoundness flex flex-col gap-2 shadow-sm shrink-0">
+          <div className="flex justify-between text-[11px] font-extrabold text-foregroundGrey/90">
             <span>Record (W - D - L)</span>
-            <span className="text-neutral-200">
+            <span className="text-foregroundHighlighted">
               {winCount}W - {drawCount}D - {lossCount}L
             </span>
           </div>
-          <div className="w-full h-2 rounded-full overflow-hidden bg-neutral-800 flex">
+          <div className="w-full h-1.5 rounded-borderRoundness overflow-hidden bg-backgroundBoxBox/40 flex shrink-0 border border-white/5">
             <div
               style={{ width: `${(winCount / games.length) * 100}%` }}
-              className="bg-emerald-500 h-full"
+              className="bg-highlightBest h-full"
               title={`Wins: ${winCount}`}
             />
             <div
               style={{ width: `${(drawCount / games.length) * 100}%` }}
-              className="bg-neutral-500 h-full"
+              className="bg-neutral-500/70 h-full"
               title={`Draws: ${drawCount}`}
             />
             <div
               style={{ width: `${(lossCount / games.length) * 100}%` }}
-              className="bg-rose-500 h-full"
+              className="bg-highlightBlunder h-full border-l border-white/5"
               title={`Losses: ${lossCount}`}
             />
           </div>
@@ -483,13 +485,13 @@ export default function Library() {
 
       {/* Saved Games List */}
       <div className="flex flex-col gap-2">
-        <span className="text-xs font-bold text-neutral-400 mb-1">
+        <span className="text-[11px] font-extrabold text-foregroundGrey/90 uppercase tracking-wider mb-1 px-0.5">
           Archived Games ({games.length})
         </span>
         {games.length === 0 ? (
-          <div className="flex flex-col items-center justify-center p-8 border border-dashed border-neutral-800 rounded-xl bg-neutral-900/20 text-center text-neutral-500 gap-2">
+          <div className="flex flex-col items-center justify-center p-8 border border-dashed border-white/5 rounded-borderExtraRoundness bg-backgroundBoxBox/20 text-center text-foregroundGrey/50 gap-2">
             <svg
-              className="w-8 h-8 text-neutral-600"
+              className="w-8 h-8 text-foregroundGrey/45"
               fill="none"
               stroke="currentColor"
               viewBox="0 0 24 24"
@@ -501,16 +503,15 @@ export default function Library() {
                 d="M12 6.042A8.967 8.967 0 006 3.75c-1.052 0-2.062.18-3 .512v14.25A8.987 8.987 0 016 18c2.305 0 4.408.867 6 2.292m0-14.25a8.966 8.966 0 016-2.292c1.052 0 2.062.18 3 .512v14.25A8.987 8.987 0 0018 18a8.967 8.967 0 00-6 2.292m0-14.25v14.25"
               ></path>
             </svg>
-            <span className="text-xs font-medium">
+            <span className="text-xs font-semibold">
               No saved games in your database yet.
             </span>
-            <p className="text-[10px] text-neutral-600 max-w-[200px]">
-              Import a PGN or FEN, analyze it, and click &quot;Save to
-              Library&quot; inside the Summary tab.
+            <p className="text-[10px] text-foregroundGrey/40 max-w-[200px] leading-normal font-semibold">
+              Import a PGN or FEN, analyze it, and click &quot;Save to Library&quot; inside the Summary tab.
             </p>
           </div>
         ) : (
-          <div className="flex flex-col gap-2">
+          <div className="flex flex-col gap-2 max-h-[300px] overflow-y-auto pr-1">
             {games.map((game) => {
               const isWhiteWinner = game.result === "1-0";
               const isBlackWinner = game.result === "0-1";
@@ -519,11 +520,11 @@ export default function Library() {
                 <div
                   key={game.id}
                   onClick={() => handleLoadGame(game.id)}
-                  className="group bg-neutral-950/40 hover:bg-neutral-900/60 p-3 rounded-lg border border-neutral-800 hover:border-neutral-700 transition-all duration-200 cursor-pointer flex flex-col gap-2 relative overflow-hidden"
+                  className="group bg-backgroundBoxBox/20 hover:bg-backgroundBoxBox/45 border border-white/5 hover:border-white/10 p-3 rounded-borderRoundness transition-all duration-150 cursor-pointer flex flex-col gap-2 relative overflow-hidden shadow-sm"
                 >
                   {/* Top metadata */}
-                  <div className="flex justify-between items-center text-[10px] text-neutral-500">
-                    <span className="font-semibold text-neutral-400 max-w-[180px] truncate">
+                  <div className="flex justify-between items-center text-[9px] text-foregroundGrey/60 font-semibold px-0.5">
+                    <span className="text-foregroundGrey/80 max-w-[180px] truncate font-extrabold">
                       {game.event}
                     </span>
                     <span>{game.date}</span>
@@ -531,41 +532,41 @@ export default function Library() {
 
                   {/* Player Rows & Stats */}
                   <div className="flex justify-between items-center">
-                    <div className="flex flex-col gap-1.5 w-[65%]">
+                    <div className="flex flex-col gap-1.5 w-[70%]">
                       {/* White Player */}
-                      <div className="flex items-center gap-1.5">
-                        <span className="w-3 h-3 bg-white border border-neutral-600 rounded-sm"></span>
+                      <div className="flex items-center gap-1.5 select-none">
+                        <span className="w-2.5 h-2.5 bg-white border border-neutral-600 rounded-sm shrink-0"></span>
                         <span
-                          className={`text-xs font-bold truncate max-w-[150px] ${isWhiteWinner ? "text-neutral-100" : "text-neutral-400"}`}
+                          className={`text-xs font-extrabold truncate max-w-[130px] ${isWhiteWinner ? "text-foregroundHighlighted" : "text-foregroundGrey"}`}
                         >
                           {game.whiteName}
                         </span>
                         {game.whiteElo > 0 && (
-                          <span className="text-[10px] text-neutral-500 font-medium">
+                          <span className="text-[9px] text-foregroundGrey/50 font-bold ml-1">
                             ({game.whiteElo})
                           </span>
                         )}
                         {isWhiteWinner && (
-                          <span className="text-[9px] px-1 bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 rounded font-semibold scale-90 origin-left">
+                          <span className="text-[8px] px-1 bg-highlightBest/20 text-highlightBest border border-highlightBest/30 rounded font-extrabold scale-90 origin-left ml-1.5 shadow-sm">
                             WIN
                           </span>
                         )}
                       </div>
                       {/* Black Player */}
-                      <div className="flex items-center gap-1.5">
-                        <span className="w-3 h-3 bg-neutral-800 border border-neutral-600 rounded-sm"></span>
+                      <div className="flex items-center gap-1.5 select-none">
+                        <span className="w-2.5 h-2.5 bg-neutral-900 border border-neutral-700 rounded-sm shrink-0"></span>
                         <span
-                          className={`text-xs font-bold truncate max-w-[150px] ${isBlackWinner ? "text-neutral-100" : "text-neutral-400"}`}
+                          className={`text-xs font-extrabold truncate max-w-[130px] ${isBlackWinner ? "text-foregroundHighlighted" : "text-foregroundGrey"}`}
                         >
                           {game.blackName}
                         </span>
                         {game.blackElo > 0 && (
-                          <span className="text-[10px] text-neutral-500 font-medium">
+                          <span className="text-[9px] text-foregroundGrey/50 font-bold ml-1">
                             ({game.blackElo})
                           </span>
                         )}
                         {isBlackWinner && (
-                          <span className="text-[9px] px-1 bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 rounded font-semibold scale-90 origin-left">
+                          <span className="text-[8px] px-1 bg-highlightBest/20 text-highlightBest border border-highlightBest/30 rounded font-extrabold scale-90 origin-left ml-1.5 shadow-sm">
                             WIN
                           </span>
                         )}
@@ -573,26 +574,26 @@ export default function Library() {
                     </div>
 
                     {/* Accuracies */}
-                    <div className="flex items-center gap-1.5">
-                      <div className="flex flex-col items-end gap-1.5">
-                        <span className="text-xs font-extrabold text-neutral-200 bg-neutral-900 border border-neutral-800 px-1.5 py-0.5 rounded">
+                    <div className="flex items-center gap-2">
+                      <div className="flex flex-col items-end gap-1 select-none">
+                        <span className="text-[10px] font-black text-foregroundHighlighted bg-black/20 border border-white/5 px-1.5 py-0.5 rounded">
                           {game.whiteAccuracy.toFixed(1)}%
                         </span>
-                        <span className="text-xs font-extrabold text-neutral-200 bg-neutral-900 border border-neutral-800 px-1.5 py-0.5 rounded">
+                        <span className="text-[10px] font-black text-foregroundHighlighted bg-black/20 border border-white/5 px-1.5 py-0.5 rounded">
                           {game.blackAccuracy.toFixed(1)}%
                         </span>
                       </div>
 
-                      {/* Delete button (hidden until hover) */}
+                      {/* Delete button */}
                       <button
                         onClick={(e) => handleDeleteGame(game.id, e)}
                         disabled={deletingId === game.id}
-                        className="p-1 text-neutral-600 hover:text-red-400 transition-colors rounded hover:bg-neutral-800/50 outline-none select-none md:opacity-0 md:group-hover:opacity-100"
+                        className="p-1.5 text-foregroundGrey/60 hover:text-highlightBlunder hover:bg-white/5 transition-all duration-150 rounded outline-none select-none md:opacity-0 md:group-hover:opacity-100 border border-transparent hover:border-white/5 cursor-pointer shrink-0"
                         title="Delete game from library"
                       >
                         {deletingId === game.id ? (
                           <svg
-                            className="animate-spin h-4 w-4 text-red-400"
+                            className="animate-spin h-3.5 w-3.5 text-highlightBlunder"
                             fill="none"
                             viewBox="0 0 24 24"
                           >
@@ -612,7 +613,7 @@ export default function Library() {
                           </svg>
                         ) : (
                           <svg
-                            className="w-4 h-4"
+                            className="w-3.5 h-3.5"
                             fill="none"
                             stroke="currentColor"
                             viewBox="0 0 24 24"

@@ -58,7 +58,7 @@ export function AuthContextProvider({ children }: { children: ReactNode }) {
         clearSession();
       }
     } catch (err) {
-      console.error("Failed to fetch profile", err);
+      console.warn("Failed to fetch profile (ignoring in WASM/offline mode)", err);
       clearSession();
     } finally {
       setLoadingUser(false);

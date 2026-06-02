@@ -107,14 +107,14 @@ export default function TablebaseExplorer(props: { fen?: string }) {
   // If pieces > 7, display a neat, unobtrusive informative message
   if (pieceCount > 7) {
     return (
-      <div className="w-[85%] flex flex-col gap-1.5 bg-backgroundBoxDarker rounded-borderRoundness px-3 py-2 border border-neutral-800/40 opacity-80">
-        <div className="flex flex-row items-center justify-between text-xs font-bold text-foregroundGrey">
-          <span className="flex items-center gap-1.5">🗂️ Syzygy Tablebase</span>
-          <span className="text-[10px] bg-backgroundBoxBox px-1.5 py-0.5 rounded-borderRoundness font-mono">
+      <div className="w-[85%] flex flex-col gap-1.5 bg-backgroundBoxBox/45 border border-white/5 backdrop-blur-md rounded-borderRoundness px-3 py-2.5 opacity-80 transition-all duration-300">
+        <div className="flex flex-row items-center justify-between text-[11px] font-bold text-foregroundGrey/90">
+          <span className="flex items-center gap-1.5 font-extrabold text-foregroundHighlighted">🗂️ Syzygy Tablebase</span>
+          <span className="text-[9px] bg-backgroundBoxBox px-1.5 py-0.5 rounded-borderRoundness font-mono text-foreground font-extrabold">
             {pieceCount} pieces
           </span>
         </div>
-        <div className="text-[10px] text-foregroundGrey italic leading-tight">
+        <div className="text-[10px] text-foregroundGrey/60 italic leading-tight">
           Active in endgames with 7 or fewer pieces remaining.
         </div>
       </div>
@@ -143,16 +143,13 @@ export default function TablebaseExplorer(props: { fen?: string }) {
 
   const getOutcomeColor = (category: string) => {
     if (category.includes("win"))
-      return "text-highlightGreat bg-highlightGreat/10 border-highlightGreat/30";
+      return "text-highlightBest bg-highlightBest/10 border-highlightBest/20 shadow-[0_0_8px_rgba(129,182,76,0.1)]";
     if (category.includes("loss"))
-      return "text-highlightBlunder bg-highlightBlunder/10 border-highlightBlunder/30";
-    return "text-highlightBook bg-highlightBook/10 border-highlightBook/30";
+      return "text-highlightBlunder bg-highlightBlunder/10 border-highlightBlunder/20 shadow-[0_0_8px_rgba(250,65,45,0.1)]";
+    return "text-highlightBook bg-highlightBook/10 border-highlightBook/20";
   };
 
   const getMoveOutcomeLabel = (category: string) => {
-    // For moves, the category represents the resulting position.
-    // If resulting position is 'loss', it means the opponent loses, which means this move is a WIN for the side playing it!
-    // If resulting position is 'win', it means the opponent wins, which means this move is a LOSS for the side playing it!
     if (category === "loss") return "WIN";
     if (category === "win") return "LOSS";
     if (category === "draw") return "DRAW";
@@ -163,10 +160,10 @@ export default function TablebaseExplorer(props: { fen?: string }) {
 
   const getMoveOutcomeColor = (category: string) => {
     if (category === "loss" || category === "blessed-loss")
-      return "bg-highlightGreat/20 text-highlightGreat border border-highlightGreat/45";
+      return "bg-highlightBest/20 text-highlightBest border border-highlightBest/30 shadow-sm";
     if (category === "win" || category === "cursed-win")
-      return "bg-highlightBlunder/20 text-highlightBlunder border border-highlightBlunder/45";
-    return "bg-neutral-800 text-foregroundGrey border border-neutral-700/50";
+      return "bg-highlightBlunder/20 text-highlightBlunder border border-highlightBlunder/30 shadow-sm";
+    return "bg-backgroundBoxBox/30 text-foregroundGrey/90 border border-white/5";
   };
 
   const getDtmDtzLabel = (m: TablebaseMove) => {
@@ -176,30 +173,30 @@ export default function TablebaseExplorer(props: { fen?: string }) {
   };
 
   return (
-    <div className="w-[85%] flex flex-col gap-2 bg-backgroundBoxDarker rounded-borderRoundness px-3 py-2 border border-neutral-750">
-      <div className="flex flex-row items-center justify-between text-xs font-bold text-foregroundGrey">
-        <span className="flex items-center gap-1.5 font-extrabold text-foreground">
+    <div className="w-[85%] flex flex-col gap-2.5 bg-backgroundBoxBox/45 border border-white/5 backdrop-blur-md rounded-borderRoundness px-3 py-2.5 shadow-sm transition-all duration-300">
+      <div className="flex flex-row items-center justify-between text-[11px] font-bold text-foregroundGrey/90">
+        <span className="flex items-center gap-1.5 font-extrabold text-foregroundHighlighted">
           🗂️ Syzygy Tablebase
         </span>
-        <span className="text-[10px] bg-backgroundBoxBox px-1.5 py-0.5 rounded-borderRoundness font-mono text-foreground font-extrabold">
+        <span className="text-[9px] bg-backgroundBoxBox px-1.5 py-0.5 rounded-borderRoundness font-mono text-foreground font-extrabold">
           {pieceCount} pieces
         </span>
       </div>
 
       {loading && (
-        <div className="text-xs text-foregroundGrey py-1">
+        <div className="text-xs text-foregroundGrey/50 py-2 italic font-medium animate-pulse">
           Probing Syzygy Tablebase...
         </div>
       )}
       {error && (
-        <div className="text-xs text-highlightMistake py-1">{error}</div>
+        <div className="text-xs text-highlightMistake py-1 font-semibold">{error}</div>
       )}
 
       {data && !loading && (
-        <div className="flex flex-col gap-2">
+        <div className="flex flex-col gap-2.5">
           {/* Header outcome summary */}
           <div
-            className={`flex flex-row items-center justify-between text-xs font-bold border px-2 py-1.5 rounded-borderRoundness ${getOutcomeColor(data.category)}`}
+            className={`flex flex-row items-center justify-between text-xs font-extrabold border px-2.5 py-1.5 rounded-borderRoundness ${getOutcomeColor(data.category)}`}
           >
             <span>{getOutcomeText(data.category)}</span>
             {data.dtm !== null && (
@@ -212,17 +209,17 @@ export default function TablebaseExplorer(props: { fen?: string }) {
 
           {/* Special board states */}
           {data.checkmate && (
-            <div className="text-xs text-highlightGreat font-bold">
+            <div className="text-xs text-highlightBest font-extrabold animate-fade-in">
               Position is Checkmate.
             </div>
           )}
           {data.stalemate && (
-            <div className="text-xs text-highlightBook font-bold">
+            <div className="text-xs text-highlightBook font-extrabold animate-fade-in">
               Position is Stalemate.
             </div>
           )}
           {data.insufficient_material && (
-            <div className="text-xs text-foregroundGrey">
+            <div className="text-xs text-foregroundGrey/80 font-medium">
               Insufficient material to force mate.
             </div>
           )}
@@ -230,7 +227,7 @@ export default function TablebaseExplorer(props: { fen?: string }) {
           {/* Tablebase Moves */}
           {data.moves && data.moves.length > 0 ? (
             <div className="flex flex-col gap-1.5">
-              <div className="text-[10px] font-bold text-foregroundGrey uppercase tracking-wider">
+              <div className="text-[9px] font-extrabold text-foregroundGrey/70 uppercase tracking-wider px-0.5">
                 Tablebase Moves
               </div>
               <ul className="flex flex-col gap-1.5 max-h-[140px] overflow-y-auto pr-1">
@@ -239,19 +236,19 @@ export default function TablebaseExplorer(props: { fen?: string }) {
                   return (
                     <li
                       key={m.uci}
-                      className="flex flex-row justify-between items-center text-xs bg-backgroundBoxBox/45 hover:bg-backgroundBoxBox border border-neutral-800 px-2 py-1.5 rounded-borderRoundness"
+                      className="flex flex-row justify-between items-center text-xs bg-backgroundBoxBox/20 hover:bg-backgroundBoxBox/45 border border-white/5 hover:border-white/10 px-2.5 py-1.5 rounded-borderRoundness transition-colors duration-150"
                     >
                       <div className="flex items-center gap-2">
-                        <span className="font-extrabold text-foreground">
+                        <span className="font-extrabold text-foregroundHighlighted">
                           {m.san}
                         </span>
-                        <span className="text-[9px] text-foregroundGrey font-mono opacity-80 uppercase">
+                        <span className="text-[9px] text-foregroundGrey/50 font-mono opacity-80 uppercase font-medium">
                           ({m.uci})
                         </span>
                       </div>
                       <div className="flex items-center gap-1.5 shrink-0">
                         {label && (
-                          <span className="text-[9px] font-mono font-bold bg-backgroundBoxBox px-1 py-0.2 rounded-borderRoundness border border-neutral-700/30">
+                          <span className="text-[9px] font-mono font-bold bg-black/20 px-1 py-0.2 rounded border border-white/5 text-foregroundGrey/80">
                             {label}
                           </span>
                         )}
@@ -269,7 +266,7 @@ export default function TablebaseExplorer(props: { fen?: string }) {
           ) : (
             !data.checkmate &&
             !data.stalemate && (
-              <div className="text-xs text-foregroundGrey">
+              <div className="text-xs text-foregroundGrey/40 italic py-1">
                 No moves available.
               </div>
             )

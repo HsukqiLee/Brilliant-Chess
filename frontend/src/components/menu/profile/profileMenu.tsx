@@ -99,9 +99,9 @@ export default function ProfileMenu() {
 
   if (loadingUser) {
     return (
-      <div className="flex flex-col flex-grow items-center justify-center p-8 text-neutral-400 gap-2">
+      <div className="flex flex-col flex-grow items-center justify-center p-8 text-foregroundGrey/60 gap-2">
         <svg
-          className="animate-spin h-8 w-8 text-neutral-500"
+          className="animate-spin h-8 w-8 text-foregroundGrey/40"
           fill="none"
           viewBox="0 0 24 24"
         >
@@ -119,7 +119,7 @@ export default function ProfileMenu() {
             d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
           ></path>
         </svg>
-        <span className="text-sm font-medium">Validating session...</span>
+        <span className="text-xs font-semibold">Validating session...</span>
       </div>
     );
   }
@@ -135,41 +135,41 @@ export default function ProfileMenu() {
     );
 
     return (
-      <div className="flex flex-col gap-5 px-6 py-4 overflow-y-auto max-h-[calc(100vh-140px)] select-text">
-        <div className="bg-neutral-900/60 p-5 rounded-xl border border-neutral-800 flex flex-col items-center gap-4 text-center">
-          <div className="w-16 h-16 rounded-full bg-gradient-to-tr from-emerald-600 to-teal-400 flex items-center justify-center text-white text-2xl font-extrabold shadow-inner select-none">
+      <div className="flex flex-col gap-5 px-6 py-4 overflow-y-auto max-h-[calc(100vh-140px)] select-text animate-fade-in w-full">
+        <div className="bg-backgroundBoxBox/45 border border-white/5 backdrop-blur-md p-5 rounded-borderExtraRoundness flex flex-col items-center gap-4 text-center shadow-sm">
+          <div className="w-16 h-16 rounded-full bg-gradient-to-tr from-highlightBest to-highlightBrilliant flex items-center justify-center text-foreground font-black text-2xl shadow-md select-none border border-white/10">
             {user.username.substring(0, 2).toUpperCase()}
           </div>
           <div>
-            <h2 className="text-xl font-black text-neutral-100">
+            <h2 className="text-lg font-black text-foregroundHighlighted">
               {user.username}
             </h2>
-            <span className="text-xs text-neutral-500 font-medium">
+            <span className="text-[10px] text-foregroundGrey/70 uppercase tracking-wider font-extrabold mt-1 block">
               Brilliant Chess Member
             </span>
           </div>
         </div>
 
-        <div className="flex flex-col gap-3 bg-neutral-950/20 p-4 rounded-xl border border-neutral-800">
-          <div className="flex justify-between items-center text-xs">
-            <span className="text-neutral-500 font-semibold">
+        <div className="flex flex-col gap-3 bg-black/15 p-4 rounded-borderExtraRoundness border border-white/5 shadow-inner">
+          <div className="flex justify-between items-center text-xs font-semibold">
+            <span className="text-foregroundGrey/80">
               Database Connection
             </span>
-            <span className="text-emerald-400 uppercase font-extrabold tracking-wider bg-emerald-500/10 px-2 py-0.5 rounded border border-emerald-500/10">
+            <span className="text-highlightBest uppercase font-extrabold tracking-wider bg-highlightBest/10 px-2 py-0.5 rounded border border-highlightBest/20 shadow-sm">
               {user.dbType}
             </span>
           </div>
-          <hr className="border-neutral-800/80" />
-          <div className="flex justify-between items-center text-xs">
-            <span className="text-neutral-500 font-semibold">Join Date</span>
-            <span className="text-neutral-300 font-bold">{formattedDate}</span>
+          <hr className="border-white/5" />
+          <div className="flex justify-between items-center text-xs font-semibold">
+            <span className="text-foregroundGrey/80">Join Date</span>
+            <span className="text-foregroundHighlighted font-bold">{formattedDate}</span>
           </div>
         </div>
 
         <button
           type="button"
           onClick={() => void logout()}
-          className="w-full text-sm font-bold py-3 rounded-xl bg-red-950/40 hover:bg-red-900/40 border border-red-900/30 hover:border-red-900/65 text-red-400 active:scale-95 transition-all cursor-pointer text-center select-none"
+          className="w-full text-sm font-extrabold py-3 rounded-borderExtraRoundness bg-red-950/20 border border-red-900/35 hover:bg-red-900/40 text-red-400 hover:text-red-300 transition-all duration-200 cursor-pointer text-center select-none active:scale-[0.98] shadow-sm"
         >
           Log Out
         </button>
@@ -178,8 +178,8 @@ export default function ProfileMenu() {
   }
 
   return (
-    <div className="flex flex-col gap-4 px-6 py-4 overflow-y-auto max-h-[calc(100vh-140px)]">
-      <div className="flex bg-neutral-950/50 p-1 rounded-xl border border-neutral-900/50 select-none">
+    <div className="flex flex-col gap-5 px-6 py-4 overflow-y-auto max-h-[calc(100vh-140px)] w-full animate-fade-in">
+      <div className="flex bg-backgroundBoxDarker/30 p-0.5 rounded-borderRoundness border border-white/5 select-none shrink-0">
         <button
           type="button"
           onClick={() => {
@@ -187,10 +187,10 @@ export default function ProfileMenu() {
             setError(null);
             setSuccess(null);
           }}
-          className={`flex-1 text-xs font-bold py-2 rounded-lg transition-all ${
+          className={`flex-grow py-1.5 text-xs font-extrabold rounded-borderRoundness transition-all duration-200 text-center cursor-pointer ${
             activeTab === "login"
-              ? "bg-neutral-800 text-neutral-100 shadow"
-              : "text-neutral-500 hover:text-neutral-300"
+              ? "bg-backgroundBoxBoxHighlighted text-foreground shadow-sm"
+              : "text-foregroundGrey hover:text-foregroundHighlighted hover:bg-white/5"
           }`}
         >
           Log In
@@ -202,21 +202,21 @@ export default function ProfileMenu() {
             setError(null);
             setSuccess(null);
           }}
-          className={`flex-1 text-xs font-bold py-2 rounded-lg transition-all ${
+          className={`flex-grow py-1.5 text-xs font-extrabold rounded-borderRoundness transition-all duration-200 text-center cursor-pointer ${
             activeTab === "register"
-              ? "bg-neutral-800 text-neutral-100 shadow"
-              : "text-neutral-500 hover:text-neutral-300"
+              ? "bg-backgroundBoxBoxHighlighted text-foreground shadow-sm"
+              : "text-foregroundGrey hover:text-foregroundHighlighted hover:bg-white/5"
           }`}
         >
           Sign Up
         </button>
       </div>
 
-      <div className="text-center mt-1 select-none">
-        <h2 className="text-lg font-black text-neutral-200">
+      <div className="text-center mt-1 select-none flex flex-col gap-1">
+        <h2 className="text-base font-black text-foregroundHighlighted">
           {activeTab === "login" ? "Welcome Back" : "Create Account"}
         </h2>
-        <p className="text-[11px] text-neutral-500 mt-1 max-w-[240px] mx-auto">
+        <p className="text-[10px] text-foregroundGrey/70 max-w-[240px] mx-auto leading-relaxed font-semibold">
           {activeTab === "login"
             ? "Log in to sync your saved chess games and personal statistics."
             : "Create a free account to back up and track your chess performance."}
@@ -224,22 +224,22 @@ export default function ProfileMenu() {
       </div>
 
       {error && (
-        <div className="bg-red-950/20 border border-red-900/30 text-red-400 p-3 rounded-lg text-xs font-medium text-center">
+        <div className="bg-highlightBlunder/15 border border-highlightBlunder/25 text-highlightBlunder p-3 rounded-borderRoundness text-xs font-semibold text-center leading-relaxed animate-fade-in">
           {error}
         </div>
       )}
       {success && (
-        <div className="bg-emerald-950/20 border border-emerald-900/30 text-emerald-400 p-3 rounded-lg text-xs font-medium text-center">
+        <div className="bg-highlightBest/15 border border-highlightBest/25 text-highlightBest p-3 rounded-borderRoundness text-xs font-semibold text-center leading-relaxed animate-fade-in">
           {success}
         </div>
       )}
 
       <form
         onSubmit={activeTab === "login" ? handleLogin : handleRegister}
-        className="flex flex-col gap-3.5"
+        className="flex flex-col gap-4 select-text"
       >
-        <div className="flex flex-col gap-1">
-          <label className="text-[10px] uppercase font-bold text-neutral-500 tracking-wider pl-1 select-none">
+        <div className="flex flex-col gap-1.5">
+          <label className="text-[9px] uppercase font-extrabold text-foregroundGrey/70 tracking-wider pl-1.5 select-none">
             Username
           </label>
           <input
@@ -248,12 +248,12 @@ export default function ProfileMenu() {
             onChange={(e) => setUsername(e.target.value)}
             placeholder="chessmaster"
             disabled={submitting}
-            className="w-full px-3.5 py-2.5 text-sm font-semibold rounded-xl border border-neutral-800 bg-neutral-950/50 hover:border-neutral-700/80 focus:border-neutral-700 outline-none text-neutral-200 placeholder:text-neutral-700 placeholder:font-normal transition-colors"
+            className="w-full px-3.5 py-2 text-sm font-semibold rounded-borderRoundness border border-white/5 bg-black/35 hover:border-white/10 focus:border-white/20 outline-none text-foregroundHighlighted placeholder:text-foregroundGrey/35 focus:outline-none transition-all duration-200 disabled:opacity-50"
           />
         </div>
 
-        <div className="flex flex-col gap-1">
-          <label className="text-[10px] uppercase font-bold text-neutral-500 tracking-wider pl-1 select-none">
+        <div className="flex flex-col gap-1.5">
+          <label className="text-[9px] uppercase font-extrabold text-foregroundGrey/70 tracking-wider pl-1.5 select-none">
             Password
           </label>
           <input
@@ -262,13 +262,13 @@ export default function ProfileMenu() {
             onChange={(e) => setPassword(e.target.value)}
             placeholder="••••••••"
             disabled={submitting}
-            className="w-full px-3.5 py-2.5 text-sm font-semibold rounded-xl border border-neutral-800 bg-neutral-950/50 hover:border-neutral-700/80 focus:border-neutral-700 outline-none text-neutral-200 placeholder:text-neutral-700 placeholder:font-normal transition-colors"
+            className="w-full px-3.5 py-2 text-sm font-semibold rounded-borderRoundness border border-white/5 bg-black/35 hover:border-white/10 focus:border-white/20 outline-none text-foregroundHighlighted placeholder:text-foregroundGrey/35 focus:outline-none transition-all duration-200 disabled:opacity-50"
           />
         </div>
 
         {activeTab === "register" && (
-          <div className="flex flex-col gap-1">
-            <label className="text-[10px] uppercase font-bold text-neutral-500 tracking-wider pl-1 select-none">
+          <div className="flex flex-col gap-1.5">
+            <label className="text-[9px] uppercase font-extrabold text-foregroundGrey/70 tracking-wider pl-1.5 select-none">
               Confirm Password
             </label>
             <input
@@ -277,7 +277,7 @@ export default function ProfileMenu() {
               onChange={(e) => setConfirmPassword(e.target.value)}
               placeholder="••••••••"
               disabled={submitting}
-              className="w-full px-3.5 py-2.5 text-sm font-semibold rounded-xl border border-neutral-800 bg-neutral-950/50 hover:border-neutral-700/80 focus:border-neutral-700 outline-none text-neutral-200 placeholder:text-neutral-700 placeholder:font-normal transition-colors"
+              className="w-full px-3.5 py-2 text-sm font-semibold rounded-borderRoundness border border-white/5 bg-black/35 hover:border-white/10 focus:border-white/20 outline-none text-foregroundHighlighted placeholder:text-foregroundGrey/35 focus:outline-none transition-all duration-200 disabled:opacity-50"
             />
           </div>
         )}
@@ -285,7 +285,7 @@ export default function ProfileMenu() {
         <button
           type="submit"
           disabled={submitting}
-          className="w-full text-sm font-bold py-3 mt-2 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white active:scale-95 disabled:scale-100 disabled:opacity-50 transition-all cursor-pointer text-center select-none"
+          className="w-full text-xs font-extrabold py-3 mt-2 rounded-borderExtraRoundness bg-backgroundBoxBoxHighlighted hover:bg-backgroundBoxBoxHighlightedHover text-foreground transition-all duration-200 cursor-pointer text-center select-none active:scale-[0.98] disabled:opacity-50 disabled:cursor-not-allowed border-none shadow-sm hover:shadow-shadowBoxBoxHighlighted"
         >
           {submitting
             ? activeTab === "login"

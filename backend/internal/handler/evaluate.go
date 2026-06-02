@@ -67,6 +67,7 @@ func (h *EvaluateHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 
 	// Flag to track if TCP had an error and should be discarded rather than recycled
 	var tcpErrOccurred int32
+	var sessionClosing int32
 
 	// Done channels to coordinate exit of both loops
 	sessionDone := make(chan struct{})
@@ -78,7 +79,8 @@ func (h *EvaluateHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		for {
 			_, msg, err := wsConn.ReadMessage()
 			if err != nil {
-				// Client disconnected
+				// Client disconnected, mark session as closing normally
+				atomic.StoreInt32(&sessionClosing, 1)
 				return
 			}
 			cmd := string(msg)
@@ -103,6 +105,10 @@ func (h *EvaluateHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		for {
 			line, err := reader.ReadString('\n')
 			if err != nil {
+				// If session is closing normally, this timeout error is expected
+				if atomic.LoadInt32(&sessionClosing) == 1 {
+					return
+				}
 				// Handle reading interruption from timeout or real error
 				if !strings.Contains(err.Error(), "i/o timeout") && err != io.EOF {
 					log.Printf("Error reading from Stockfish TCP: %v", err)

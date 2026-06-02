@@ -120,7 +120,7 @@ func (p *StockfishPool) dialNew(modelID string) (net.Conn, error) {
 
 // validateConn does a quick isready check to verify the connection is healthy
 func (p *StockfishPool) validateConn(conn net.Conn) bool {
-	conn.SetDeadline(time.Now().Add(10 * time.Second))
+	conn.SetDeadline(time.Now().Add(30 * time.Second))
 	defer conn.SetDeadline(time.Time{})
 
 	_, err := conn.Write([]byte("isready\n"))
@@ -142,7 +142,7 @@ func (p *StockfishPool) validateConn(conn net.Conn) bool {
 
 // resetConn stops searches and resets the game state
 func (p *StockfishPool) resetConn(conn net.Conn) bool {
-	conn.SetDeadline(time.Now().Add(10 * time.Second))
+	conn.SetDeadline(time.Now().Add(30 * time.Second))
 	defer conn.SetDeadline(time.Time{})
 
 	// stop any active calculations, trigger ucinewgame, and check readiness

@@ -61,11 +61,12 @@ type AccuracyTrendPoint struct {
 func (h *LibraryHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	path := r.URL.Path
 	if path == "/api/games" {
-		if r.Method == http.MethodGet {
+		switch r.Method {
+		case http.MethodGet:
 			h.listGames(w, r)
-		} else if r.Method == http.MethodPost {
+		case http.MethodPost:
 			h.saveGame(w, r)
-		} else {
+		default:
 			http.Error(w, "Method not allowed", http.StatusMethodNotAllowed)
 		}
 	} else if strings.HasPrefix(path, "/api/games/") {
@@ -74,11 +75,12 @@ func (h *LibraryHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 			idStr = strings.TrimPrefix(path, "/api/games/")
 		}
 
-		if r.Method == http.MethodGet {
+		switch r.Method {
+		case http.MethodGet:
 			h.getGame(w, r, idStr)
-		} else if r.Method == http.MethodDelete {
+		case http.MethodDelete:
 			h.deleteGame(w, r, idStr)
-		} else {
+		default:
 			http.Error(w, "Method not allowed", http.StatusMethodNotAllowed)
 		}
 	} else if path == "/api/stats" {

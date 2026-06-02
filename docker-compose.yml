@@ -52,8 +52,8 @@ services:
       args:
         - STOCKFISH_ARCH=${STOCKFISH_ARCH:-x86-64}
     environment:
-      - STOCKFISH_THREADS=${STOCKFISH_THREADS:-16}
-      - STOCKFISH_HASH=${STOCKFISH_HASH:-2048}
+      - STOCKFISH_THREADS=${STOCKFISH_THREADS:-2}
+      - STOCKFISH_HASH=${STOCKFISH_HASH:-256}
     ports:
       - "3333:3333"
       - "3334:3334"

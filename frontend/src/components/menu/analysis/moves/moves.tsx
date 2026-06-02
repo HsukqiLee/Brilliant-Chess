@@ -92,11 +92,15 @@ export default function Moves(props: {
   } = props;
 
   const [movesHeight, setMovesHeight] = useState(0);
+  const [activeTab, setActiveTab] = useState<"engine" | "opening" | "tablebase" | "variations">("engine");
 
   const componentRef = useRef<HTMLDivElement>(null);
   const commentsRef = useRef<HTMLDivElement>(null);
   const moveListRef = useRef<HTMLUListElement>(null);
   const gameChartRef = useRef<HTMLDivElement>(null);
+  const toolTabsRef = useRef<HTMLDivElement>(null);
+  const activeToolRef = useRef<HTMLDivElement>(null);
+  const bestMoveRef = useRef<HTMLDivElement>(null);
 
   const firstMoveBlack = moves[1]?.color === WHITE;
 
@@ -150,7 +154,6 @@ export default function Moves(props: {
   function resizeMoves() {
     if (
       !componentRef.current ||
-      !commentsRef.current ||
       !moveListRef.current ||
       !gameChartRef.current
     )
@@ -158,15 +161,18 @@ export default function Moves(props: {
 
     const totalHeight = componentRef.current.offsetHeight;
 
-    const commentsHeight = commentsRef.current.offsetHeight;
-    const gameChartHeight = gameChartRef.current.offsetHeight;
+    const commentsHeight = commentsRef.current?.offsetHeight ?? 0;
+    const gameChartHeight = gameChartRef.current?.offsetHeight ?? 0;
+    const toolTabsHeight = toolTabsRef.current?.offsetHeight ?? 0;
+    const activeToolHeight = activeToolRef.current?.offsetHeight ?? 0;
+    const bestMoveHeight = bestMoveRef.current?.offsetHeight ?? 0;
 
-    const newMovesHeight = totalHeight - (commentsHeight + gameChartHeight);
+    // Calculate remaining height with layout gaps safety margin
+    const newMovesHeight = totalHeight - (commentsHeight + gameChartHeight + toolTabsHeight + activeToolHeight + bestMoveHeight + 52);
 
-    setMovesHeight(newMovesHeight);
-    moveListRef.current.style.height = newMovesHeight
-      ? `${newMovesHeight}px`
-      : "100%";
+    const safeMovesHeight = Math.max(newMovesHeight, 100);
+    setMovesHeight(safeMovesHeight);
+    moveListRef.current.style.height = `${safeMovesHeight}px`;
   }
 
   useEffect(() => {
@@ -179,7 +185,7 @@ export default function Moves(props: {
 
   useEffect(() => {
     resizeMoves();
-  }, [moveNumber]);
+  }, [moveNumber, activeTab]);
 
   function handleMoveClick(number: number) {
     setMoveNumber(number);
@@ -240,7 +246,7 @@ export default function Moves(props: {
   );
 
   return (
-    <div ref={componentRef} className="flex flex-col gap-3 items-center h-full">
+    <div ref={componentRef} className="flex flex-col gap-3 items-center h-full w-full">
       <div ref={commentsRef} className="w-full flex flex-col items-center">
         <Comments
           comment={analyzingMove ? previousMove?.comment : move?.comment}
@@ -273,13 +279,46 @@ export default function Moves(props: {
           }
         />
       </div>
-      <CandidateMoves fen={move?.fen} />
-      <VariationExplorer />
-      <OpeningExplorer fen={move?.fen} />
-      <TablebaseExplorer fen={move?.fen} />
+
+      {/* Explorer / Analysis Tab Selector */}
+      <div ref={toolTabsRef} className="w-[85%] bg-backgroundBoxDarker/30 p-0.5 rounded-borderRoundness flex flex-row border border-white/5 select-none shrink-0">
+        {(["engine", "opening", "tablebase", "variations"] as const).map((tabId) => {
+          const isActive = activeTab === tabId;
+          const labels = {
+            engine: "🤖 Engine",
+            opening: "📖 Opening",
+            tablebase: "🗂️ Tablebase",
+            variations: "🌿 Variations",
+          };
+          return (
+            <button
+              key={tabId}
+              type="button"
+              onClick={() => setActiveTab(tabId)}
+              className={`flex-grow py-1.5 text-[10px] font-extrabold rounded-borderRoundness transition-all duration-200 text-center cursor-pointer ${
+                isActive
+                  ? "bg-backgroundBoxBoxHighlighted text-foreground shadow-md scale-102"
+                  : "text-foregroundGrey hover:text-foregroundHighlighted hover:bg-white/5"
+              }`}
+            >
+              {labels[tabId]}
+            </button>
+          );
+        })}
+      </div>
+
+      {/* Active Explorer Content */}
+      <div ref={activeToolRef} className="w-full shrink-0 flex flex-col items-center animate-fade-in" key={activeTab}>
+        {activeTab === "engine" && <CandidateMoves fen={move?.fen} />}
+        {activeTab === "opening" && <OpeningExplorer fen={move?.fen} />}
+        {activeTab === "tablebase" && <TablebaseExplorer fen={move?.fen} />}
+        {activeTab === "variations" && <VariationExplorer />}
+      </div>
+
       <div
+        ref={bestMoveRef}
         style={{ display: previousMove ? "" : "none" }}
-        className="bg-backgroundBoxDarker w-full"
+        className="bg-backgroundBoxDarker w-full shrink-0"
       >
         <div className="w-[85%] font-extrabold text-highlightBest mx-auto flex flex-row items-center gap-2 py-2">
           <FormatEval

@@ -190,24 +190,24 @@ export default function MistakesReview() {
       </div>
 
       {reviewState.solved && (
-        <div className="flex flex-col gap-3 bg-green-950/30 text-green-300 border border-green-800/40 p-4 rounded-borderRoundness animate-fade-in">
-          <div className="flex flex-row items-center gap-2 font-extrabold text-lg">
+        <div className="flex flex-col gap-3 bg-green-950/20 text-green-300 border border-green-850/30 p-4 rounded-borderRoundness animate-fade-in shadow-sm">
+          <div className="flex flex-row items-center gap-2 font-extrabold text-base">
             <span>Correct! 🎉</span>
             {reviewState.theme && (
-              <span className="px-2 py-0.5 bg-green-900/50 text-green-200 border border-green-700/50 rounded text-xs">
+              <span className="px-2 py-0.5 bg-green-900/50 text-green-200 border border-green-700/50 rounded text-[10px] font-extrabold uppercase">
                 主题: {reviewState.theme}
               </span>
             )}
           </div>
 
           {reviewState.loadingExplanation ? (
-            <div className="text-sm text-green-400/80 italic flex flex-row items-center gap-2">
-              <div className="w-4 h-4 border-2 border-green-400 border-t-transparent rounded-full animate-spin" />
+            <div className="text-xs text-green-400/80 italic flex flex-row items-center gap-2 font-semibold">
+              <div className="w-3.5 h-3.5 border-2 border-green-400 border-t-transparent rounded-full animate-spin" />
               AI Coach is analyzing tactical theme...
             </div>
           ) : (
             reviewState.explanation && (
-              <p className="text-sm text-green-200/90 leading-relaxed font-semibold">
+              <p className="text-xs text-green-200/90 leading-relaxed font-semibold">
                 {reviewState.explanation}
               </p>
             )
@@ -215,7 +215,7 @@ export default function MistakesReview() {
 
           <button
             onClick={nextMistake}
-            className="mt-2 w-full py-3 bg-green-700 hover:bg-green-600 active:bg-green-800 text-white rounded-borderRoundness font-extrabold transition-colors shadow-lg shadow-green-950/20"
+            className="mt-2 w-full py-3 bg-backgroundBoxBoxHighlighted hover:bg-backgroundBoxBoxHighlightedHover text-foreground rounded-borderRoundness font-extrabold transition-all duration-200 cursor-pointer shadow-sm hover:shadow-shadowBoxBoxHighlighted border-none"
           >
             {currentReviewIndex + 1 < mistakesList.length
               ? "Next Mistake"
@@ -225,14 +225,14 @@ export default function MistakesReview() {
       )}
 
       {reviewState.wrong && (
-        <div className="flex flex-col gap-3 bg-red-950/20 text-red-300 border border-red-900/30 p-4 rounded-borderRoundness animate-shake">
-          <div className="font-extrabold text-md">
+        <div className="flex flex-col gap-3 bg-red-950/15 text-red-300 border border-red-900/25 p-4 rounded-borderRoundness animate-fade-in shadow-sm">
+          <div className="font-extrabold text-sm text-foregroundHighlighted">
             That is not the best move! ❌
           </div>
-          <div className="text-sm text-red-300/80">
+          <div className="text-xs text-red-300/80 font-semibold leading-relaxed">
             Try to look for a better tactical response or position improvement.
           </div>
-          <div className="flex flex-row gap-2 mt-1">
+          <div className="flex flex-row gap-2 mt-1 select-none">
             <button
               onClick={() =>
                 setReviewState((prev) => ({
@@ -241,13 +241,13 @@ export default function MistakesReview() {
                   playedMove: null,
                 }))
               }
-              className="flex-1 py-2 bg-red-900/50 hover:bg-red-800/60 text-red-200 rounded border border-red-800/40 text-sm font-bold transition-colors"
+              className="flex-1 py-2 bg-red-950/40 hover:bg-red-900/40 text-red-400 hover:text-red-300 rounded border border-red-900/30 text-xs font-bold transition-all duration-150 cursor-pointer"
             >
               Retry
             </button>
             <button
               onClick={showSolution}
-              className="flex-1 py-2 bg-backgroundBoxBox hover:bg-backgroundBoxBoxHover text-foreground rounded text-sm font-bold transition-colors"
+              className="flex-1 py-2 bg-backgroundBoxBox/40 hover:bg-backgroundBoxBoxHover text-foregroundHighlighted rounded border border-white/5 text-xs font-bold transition-all duration-150 cursor-pointer"
             >
               Show Solution
             </button>

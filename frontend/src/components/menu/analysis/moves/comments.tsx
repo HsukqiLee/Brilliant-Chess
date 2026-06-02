@@ -167,43 +167,76 @@ export default function Comments(props: CommentsProps) {
     }
   };
 
+  const ratingColors = {
+    forced: "text-foregroundGrey",
+    brilliant: "text-highlightBrilliant",
+    great: "text-highlightGreat",
+    best: "text-highlightBest",
+    excellent: "text-highlightExcellent",
+    good: "text-highlightGood",
+    book: "text-highlightBook",
+    inaccuracy: "text-highlightInaccuracy",
+    mistake: "text-highlightMistake",
+    miss: "text-highlightMiss",
+    blunder: "text-highlightBlunder",
+  };
+
+  const glowClasses = {
+    forced: "glow-normal border-white/5",
+    brilliant: "glow-brilliant border-highlightBrilliant/30",
+    great: "glow-normal border-highlightGreat/30",
+    best: "glow-best border-highlightBest/30",
+    excellent: "glow-best border-highlightExcellent/30",
+    good: "glow-normal border-highlightGood/20",
+    book: "glow-normal border-highlightBook/20",
+    inaccuracy: "glow-mistake border-highlightInaccuracy/25",
+    mistake: "glow-mistake border-highlightMistake/25",
+    miss: "glow-miss border-highlightMiss/25",
+    blunder: "glow-blunder border-highlightBlunder/25",
+  };
+
   if (!comment || !rating || !moveSan) {
     return (
       <div
-        className="bg-white w-[85%] rounded-borderExtraRoundness p-4 font-bold text-lg text-foregroundBlack"
+        className="bg-backgroundBoxBox/45 border border-white/5 backdrop-blur-md w-[85%] rounded-borderExtraRoundness p-4 font-bold text-[15px] text-foreground/90 transition-all duration-300 shadow-md leading-relaxed"
         dangerouslySetInnerHTML={{ __html: overallGameComment }}
       />
     );
   }
 
+  const glowClass = glowClasses[rating] || "border-white/5";
+  const ratingColor = ratingColors[rating] || "text-foreground";
+
   return (
     <div
-      style={{ backgroundColor: "#ffffff" }}
-      className="min-h-44 w-[85%] p-4 rounded-borderExtraRoundness text-foregroundBlack text-lg font-bold flex flex-col gap-2 shadow-sm"
+      className={`min-h-44 w-[85%] p-4 rounded-borderExtraRoundness text-foreground text-[16px] font-bold flex flex-col gap-3 shadow-md bg-backgroundBoxBox/45 border backdrop-blur-md transition-all duration-300 ${glowClass}`}
     >
       <div className="flex flex-row justify-between items-center">
-        <div className="flex flex-row items-center gap-2 min-w-0">
-          <RatingSVG draggable rating={rating} size={32} />
-          <span className="truncate">
-            {moveSan} {RATING_FORMATS[rating].replace("_", rating)}
+        <div className="flex flex-row items-center gap-2.5 min-w-0">
+          <RatingSVG draggable rating={rating} size={30} />
+          <span className="truncate tracking-wide text-foregroundHighlighted">
+            {moveSan}{" "}
+            <span className={`${ratingColor} font-extrabold uppercase text-xs ml-1 bg-black/25 px-2 py-0.5 rounded-borderRoundness`}>
+              {rating}
+            </span>
           </span>
         </div>
         <FormatEval evaluation={evaluation} white={white} />
       </div>
 
-      <div className="text-sm font-semibold text-neutral-600 leading-normal mb-1">
+      <div className="text-xs font-semibold text-foregroundGrey/90 leading-relaxed mb-0.5">
         {comment}
       </div>
 
       {isBackendEnabled && (
-        <div className="border-t border-neutral-100 pt-2 mt-1">
+        <div className="border-t border-white/5 pt-2 mt-0.5">
           {aiComment ? (
-            <div className="bg-neutral-50 border border-neutral-100/70 p-2.5 rounded-borderRoundness text-xs font-semibold text-neutral-800 leading-relaxed">
-              <div className="flex items-center justify-between font-bold text-neutral-500 text-[10px] uppercase tracking-wider mb-1">
-                <span>✨ AI Coach Commentary</span>
+            <div className="bg-backgroundBoxDarker/50 border border-white/5 p-3 rounded-borderRoundness text-xs font-semibold text-foreground/95 leading-relaxed animate-fade-in">
+              <div className="flex items-center justify-between font-bold text-foregroundGrey text-[9px] uppercase tracking-wider mb-1.5">
+                <span className="flex items-center gap-1">✨ AI Coach Commentary</span>
                 <button
                   onClick={fetchAiComment}
-                  className="text-[10px] text-highlightGreat hover:underline bg-transparent border-none cursor-pointer p-0 font-bold"
+                  className="text-[9px] text-highlightGreat hover:text-foregroundHighlighted hover:underline bg-transparent border-none cursor-pointer p-0 font-bold transition-colors"
                   disabled={loading}
                 >
                   Regenerate
@@ -212,16 +245,16 @@ export default function Comments(props: CommentsProps) {
               <p className="whitespace-pre-wrap">{aiComment}</p>
             </div>
           ) : loading ? (
-            <div className="flex items-center justify-center gap-2 py-3 text-xs text-neutral-500 font-bold animate-pulse">
+            <div className="flex items-center justify-center gap-2 py-3 text-xs text-foregroundGrey font-bold animate-pulse">
               <span>✨ AI Coach is reviewing the move...</span>
             </div>
           ) : error ? (
             <div className="flex flex-col gap-1.5 py-1">
-              <span className="text-xs text-highlightBlunder">{error}</span>
+              <span className="text-xs text-highlightBlunder font-medium">{error}</span>
               <button
                 type="button"
                 onClick={fetchAiComment}
-                className="text-[10px] text-highlightGreat font-extrabold hover:underline self-start bg-transparent border-none cursor-pointer p-0"
+                className="text-[10px] text-highlightGreat font-extrabold hover:text-foregroundHighlighted hover:underline self-start bg-transparent border-none cursor-pointer p-0 transition-colors"
               >
                 Retry
               </button>
@@ -230,7 +263,7 @@ export default function Comments(props: CommentsProps) {
             <button
               type="button"
               onClick={fetchAiComment}
-              className="w-full flex items-center justify-center gap-1.5 py-1.5 rounded-borderRoundness bg-highlightGreat text-white hover:bg-highlightGreat/95 transition-colors text-xs font-extrabold cursor-pointer border-none shadow-sm"
+              className="w-full flex items-center justify-center gap-1.5 py-2 rounded-borderRoundness bg-backgroundBoxBoxHighlighted hover:bg-backgroundBoxBoxHighlightedHover text-foreground transition-all duration-200 text-xs font-extrabold cursor-pointer border-none shadow-sm hover:shadow-shadowBoxBoxHighlighted"
             >
               <span>✨ AI Coach Review (智能点评)</span>
             </button>

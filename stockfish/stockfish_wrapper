@@ -1,6 +1,21 @@
 #!/bin/bash
 engine_path="$1"
 
+# Determine which engine binary to run (fallback to native system stockfish if the custom one fails to execute)
+actual_engine="$engine_path"
+if ! "$actual_engine" < /dev/null > /dev/null 2>&1; then
+  echo "WARNING: Custom Stockfish binary at $actual_engine failed to run (likely architecture mismatch or illegal instruction)." >&2
+  system_sf=$(which stockfish 2>/dev/null)
+  if [ -x "$system_sf" ]; then
+    echo "Fallback: Using native system-compiled Stockfish at $system_sf." >&2
+    actual_engine="$system_sf"
+  else
+    echo "ERROR: Native system Stockfish fallback not found!" >&2
+  fi
+fi
+
+echo "Starting Stockfish connection with $actual_engine..." >&2
+
 # Inject performance tuning parameters if set
 (
   if [ -n "$STOCKFISH_THREADS" ]; then
@@ -14,4 +29,5 @@ engine_path="$1"
   while read -r line; do
     echo "$line"
   done
-) | "$engine_path"
+) | "$actual_engine"
+
