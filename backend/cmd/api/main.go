@@ -25,7 +25,10 @@ func main() {
 	aiSvc := service.NewAIService(cfg.AIFormat, cfg.AIAPIKey, cfg.AIEndpoint, cfg.AIModel)
 	cacheSvc := service.NewCacheService(cfg.RedisAddr, cfg.RedisPassword)
 
-	evalHandler := handler.NewEvaluateHandler(cfg)
+	stockfishPool := handler.NewStockfishPool(cfg, 5)
+	defer stockfishPool.Close()
+
+	evalHandler := handler.NewEvaluateHandler(cfg, stockfishPool)
 	commentaryHandler := handler.NewCommentaryHandler(aiSvc, cacheSvc)
 	modelsHandler := handler.NewModelsHandler(cfg)
 	tacticsHandler := handler.NewTacticsHandler(aiSvc, cacheSvc)

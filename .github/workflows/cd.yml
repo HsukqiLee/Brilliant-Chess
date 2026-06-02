@@ -66,6 +66,11 @@ jobs:
           frontend_full_tags=""
           backend_tags=""
           stockfish_tags=""
+          stockfish_sse41_tags=""
+          stockfish_avx2_tags=""
+          stockfish_bmi2_tags=""
+          stockfish_avx512_tags=""
+          stockfish_vnni512_tags=""
 
           for suffix in "${suffixes[@]}"; do
             if [ -n "$frontend_tags" ]; then
@@ -73,17 +78,43 @@ jobs:
               frontend_full_tags="${frontend_full_tags},"
               backend_tags="${backend_tags},"
               stockfish_tags="${stockfish_tags},"
+              stockfish_sse41_tags="${stockfish_sse41_tags},"
+              stockfish_avx2_tags="${stockfish_avx2_tags},"
+              stockfish_bmi2_tags="${stockfish_bmi2_tags},"
+              stockfish_avx512_tags="${stockfish_avx512_tags},"
+              stockfish_vnni512_tags="${stockfish_vnni512_tags},"
             fi
             frontend_tags="${frontend_tags}${base_image}/frontend:${suffix}"
             frontend_full_tags="${frontend_full_tags}${base_image}/frontend-full:${suffix}"
             backend_tags="${backend_tags}${base_image}/backend:${suffix}"
             stockfish_tags="${stockfish_tags}${base_image}/stockfish:${suffix}"
+            stockfish_sse41_tags="${stockfish_sse41_tags}${base_image}/stockfish:${suffix}-sse41-popcnt"
+            stockfish_avx2_tags="${stockfish_avx2_tags}${base_image}/stockfish:${suffix}-avx2"
+            stockfish_bmi2_tags="${stockfish_bmi2_tags}${base_image}/stockfish:${suffix}-bmi2"
+            stockfish_avx512_tags="${stockfish_avx512_tags}${base_image}/stockfish:${suffix}-avx512"
+            stockfish_vnni512_tags="${stockfish_vnni512_tags}${base_image}/stockfish:${suffix}-vnni512"
+          done
+
+          # Also add short tags if "latest" is built
+          for suffix in "${suffixes[@]}"; do
+            if [ "$suffix" = "latest" ]; then
+              stockfish_sse41_tags="${stockfish_sse41_tags},${base_image}/stockfish:sse41-popcnt"
+              stockfish_avx2_tags="${stockfish_avx2_tags},${base_image}/stockfish:avx2"
+              stockfish_bmi2_tags="${stockfish_bmi2_tags},${base_image}/stockfish:bmi2"
+              stockfish_avx512_tags="${stockfish_avx512_tags},${base_image}/stockfish:avx512"
+              stockfish_vnni512_tags="${stockfish_vnni512_tags},${base_image}/stockfish:vnni512"
+            fi
           done
 
           echo "frontend_tags=${frontend_tags}" >> $GITHUB_OUTPUT
           echo "frontend_full_tags=${frontend_full_tags}" >> $GITHUB_OUTPUT
           echo "backend_tags=${backend_tags}" >> $GITHUB_OUTPUT
           echo "stockfish_tags=${stockfish_tags}" >> $GITHUB_OUTPUT
+          echo "stockfish_sse41_tags=${stockfish_sse41_tags}" >> $GITHUB_OUTPUT
+          echo "stockfish_avx2_tags=${stockfish_avx2_tags}" >> $GITHUB_OUTPUT
+          echo "stockfish_bmi2_tags=${stockfish_bmi2_tags}" >> $GITHUB_OUTPUT
+          echo "stockfish_avx512_tags=${stockfish_avx512_tags}" >> $GITHUB_OUTPUT
+          echo "stockfish_vnni512_tags=${stockfish_vnni512_tags}" >> $GITHUB_OUTPUT
 
           # Determine which services to build
           # For non-dispatch events, always build all services
@@ -145,13 +176,74 @@ jobs:
           cache-from: type=gha
           cache-to: type=gha,mode=max
 
-      - name: Build and Push Stockfish Image
+      - name: Build and Push Stockfish Image (Generic x86-64)
         if: steps.meta.outputs.build_stockfish == 'true'
         uses: docker/build-push-action@v6
         with:
           context: ./stockfish
           file: ./stockfish/Dockerfile
+          build-args: STOCKFISH_ARCH=x86-64
           push: true
           tags: ${{ steps.meta.outputs.stockfish_tags }}
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+
+      - name: Build and Push Stockfish Image (SSE4.1 Popcnt)
+        if: steps.meta.outputs.build_stockfish == 'true'
+        uses: docker/build-push-action@v6
+        with:
+          context: ./stockfish
+          file: ./stockfish/Dockerfile
+          build-args: STOCKFISH_ARCH=x86-64-sse41-popcnt
+          push: true
+          tags: ${{ steps.meta.outputs.stockfish_sse41_tags }}
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+
+      - name: Build and Push Stockfish Image (AVX2)
+        if: steps.meta.outputs.build_stockfish == 'true'
+        uses: docker/build-push-action@v6
+        with:
+          context: ./stockfish
+          file: ./stockfish/Dockerfile
+          build-args: STOCKFISH_ARCH=x86-64-avx2
+          push: true
+          tags: ${{ steps.meta.outputs.stockfish_avx2_tags }}
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+
+      - name: Build and Push Stockfish Image (BMI2)
+        if: steps.meta.outputs.build_stockfish == 'true'
+        uses: docker/build-push-action@v6
+        with:
+          context: ./stockfish
+          file: ./stockfish/Dockerfile
+          build-args: STOCKFISH_ARCH=x86-64-bmi2
+          push: true
+          tags: ${{ steps.meta.outputs.stockfish_bmi2_tags }}
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+
+      - name: Build and Push Stockfish Image (AVX512)
+        if: steps.meta.outputs.build_stockfish == 'true'
+        uses: docker/build-push-action@v6
+        with:
+          context: ./stockfish
+          file: ./stockfish/Dockerfile
+          build-args: STOCKFISH_ARCH=x86-64-avx512
+          push: true
+          tags: ${{ steps.meta.outputs.stockfish_avx512_tags }}
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+
+      - name: Build and Push Stockfish Image (VNNI512)
+        if: steps.meta.outputs.build_stockfish == 'true'
+        uses: docker/build-push-action@v6
+        with:
+          context: ./stockfish
+          file: ./stockfish/Dockerfile
+          build-args: STOCKFISH_ARCH=x86-64-vnni512
+          push: true
+          tags: ${{ steps.meta.outputs.stockfish_vnni512_tags }}
           cache-from: type=gha
           cache-to: type=gha,mode=max

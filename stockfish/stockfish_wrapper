@@ -1,0 +1,13 @@
+#!/bin/bash
+engine_path="$1"
+
+# Inject performance tuning parameters if set
+(
+  if [ -n "$STOCKFISH_THREADS" ]; then
+    echo "setoption name Threads value $STOCKFISH_THREADS"
+  fi
+  if [ -n "$STOCKFISH_HASH" ]; then
+    echo "setoption name Hash value $STOCKFISH_HASH"
+  fi
+  cat
+) | "$engine_path"
