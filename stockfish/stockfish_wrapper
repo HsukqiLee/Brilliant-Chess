@@ -9,5 +9,9 @@ engine_path="$1"
   if [ -n "$STOCKFISH_HASH" ]; then
     echo "setoption name Hash value $STOCKFISH_HASH"
   fi
-  cat
+  
+  # Read line-by-line from socket stdin and forward immediately
+  while read -r line; do
+    echo "$line"
+  done
 ) | "$engine_path"
