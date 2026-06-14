@@ -7,7 +7,7 @@ COPY . .
 RUN CGO_ENABLED=0 GOOS=linux go build -o main ./cmd/api
 
 # Stage 2: Run the binary
-FROM alpine:3.23
+FROM alpine:3.24
 WORKDIR /app
 COPY --from=builder /app/main .
 EXPOSE 8080
